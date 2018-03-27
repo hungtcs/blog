@@ -1,13 +1,20 @@
 ---
 title: nRF24l01使用说明
 date: 2018-03-27 17:00:22
+categories:
+  - 编程
+  - 硬件
 tags:
+  - nRF24l01
+  - 单片机
 ---
 
 ### Enhanced ShockBurstTM 发送流程
 1. 把地址和要发送的数据按时序送入nRF24l01
 2. 配置config寄存器，使之进入发送模式
 3. 把CE置高（至少10us），激发Enhanced ShockBurstTM发射
+
+<!--more-->
 
 ### Enhanced ShockBurstTM 发送模式初始化流程
 1. 写Tx节点地址  TX_ADDR
