@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Allow: /archives/
+Allow: /categories/
+Allow: /tags/ 
+Disallow: /vendors/
+Disallow: /js/
+Disallow: /css/
+Disallow: /fonts/
+Sitemap: http://blog.hungtcs.top/sitemap.xml
+Sitemap: http://blog.hungtcs.top/baidusitemap.xml
