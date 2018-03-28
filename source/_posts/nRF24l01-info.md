@@ -2,11 +2,9 @@
 title: nRF24l01使用说明
 date: 2018-03-27 17:00:22
 categories:
-  - 编程
-  - 硬件
+  - 单片机
 tags:
   - nRF24l01
-  - 单片机
 ---
 
 ### Enhanced ShockBurstTM 发送流程
