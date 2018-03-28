@@ -12,6 +12,7 @@ tags:
 ### 接线图
 {% asset_img 1.png 接线图 %}
 
+<!-- more -->
 
 ### 代码
 ```cpp
