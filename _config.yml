@@ -5,7 +5,7 @@
 # Site
 title: 鸿则的博客
 subtitle:
-description:
+description: 一块质地不错没灵性木头
 keywords:
 author: 鸿则
 language: zh-Hans
@@ -74,6 +74,12 @@ pagination_dir: page
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
 theme: next
+
+search:
+  path: search.xml
+  field: post
+  format: html
+  limit: 10000
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
