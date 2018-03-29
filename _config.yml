@@ -93,3 +93,4 @@ leancloud_counter_security:
 deploy:
   type: git
   repo: https://github.com/hungtcs/blog.git
+  branch: gh-pages
