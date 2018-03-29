@@ -81,6 +81,13 @@ search:
   format: html
   limit: 10000
 
+leancloud_counter_security:
+  enable_sync: true
+  app_id: rnjNEztYLHHIKPuAXdxPlAO1-gzGzoHsz
+  app_key: UDavgKx5QGiLUd7nBemxzFjS
+  username:
+  password:
+
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
