@@ -393,7 +393,7 @@ font:
   # Font settings for <code> and code blocks.
   codes:
     external: true
-    family: DejaVu Sans Mono
+    family: "DejaVu Sans Mono for Powerline"
     size: 14
 
 
