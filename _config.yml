@@ -88,9 +88,16 @@ leancloud_counter_security:
   username:
   password:
 
+baidu_url_submit:
+  count: 100
+  host: blog.hungtcs.top
+  token: sAJg7i1H9e7QKA4h
+  path: baidu_urls.txt
+
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
-  type: git
-  repo: https://github.com/hungtcs/blog.git
-  branch: gh-pages
+  - type: git
+    repo: https://github.com/hungtcs/blog.git
+    branch: gh-pages
+  - type: baidu_url_submitter
