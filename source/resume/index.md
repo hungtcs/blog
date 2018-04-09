@@ -66,3 +66,6 @@ comments: false
     markdown工具，可以在当前目录启动一个http服务器，提供自动解析Markdown文档功能
 - 8052-clock https://github.com/hungtcs/8052-clock
     使用STC89C52和DS1302芯片做的数码管显示时钟程序
+
+----
+[下载此简历](./index/resume.pdf)
