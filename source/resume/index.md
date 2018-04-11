@@ -9,11 +9,22 @@ comments: false
 - 性别　　男<i class="fa fa-fw fa-mars"></i>
 - 年龄　　<script>document.write(new Date().getFullYear() - 1993)</script>
 - 出生日期　1993年2月13日
+- 学历　　本科
 - 电子邮箱　[hungtcs@163.com<i class="fa fa-fw fa-envelope-o"></i>](mailto:hungtcs@163.com)
 - 移动电话　[18813110072<i class="fa fa-fw fa-phone"></i>](tel:18813110072)
 - Github　[https://github.com/hungtcs<i class="fa fa-fw fa-link"></i>](https://github.com/hungtcs)
 - 码云　　[https://gitee.com/hungtcs<i class="fa fa-fw fa-link"></i>](https://gitee.com/hungtcs)
 - 博客　　[http://blog.hungtcs.top<i class="fa fa-fw fa-link"></i>](http://blog.hungtcs.top)
+
+### 教育背景
+1. *2009 ~ 2013* 中原工学院
+  本科专业: 计算机科学与技术
+  主要学习计算机科学与技术方面的基本理论和基本知识，接受从事研究与应用计算机的基本训练
+
+### 工作经验
+<!-- 刚毕业做的跟技术无关的工作，后来又培训了一段时间，所以就15年开始工作的 -->
+1. 百业网络科技有限公司 2015-03 ~ 2016-03
+2. 海联讯-联讯欣烨 2016-03 ~ 至今
 
 ### 技能特长
 - 熟练使用HTML和CSS层叠样式表
@@ -31,10 +42,6 @@ comments: false
 - 熟悉`Dockerfile`语法
 
   用过的框架或其他次要技能 `echarts` `highcharts` `zTree` `marked` `bootstrap` `font-awesome` `hexo` `angular` `react` `vue` `nprogress` `materialize-css` `nunjucks` `chrome-extension` `express` `electron` `elasticsearch` `kibana` `nextcloud` `hexo` `docker` `dockerfile` `nifi` `nginx` `tomcat` `tex` `cordova` `gson` `gtk` `c` `lua` `kotlin` `rust` `photon` `vim`
-
-### 工作经验
-1. 百业网络科技有限公司 2015-03 ~ 2016-03
-2. 海联讯-联讯欣烨 2016-03 ~ 至今
 
 ### 项目经验
 1. **郑州市大黄蜂房地产客户关系管理系统** *2015-03 ~ 2015-08*
