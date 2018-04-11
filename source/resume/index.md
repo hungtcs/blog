@@ -7,8 +7,8 @@ comments: false
 ### 个人信息
 - 姓名　　刘文杰
 - 性别　　男<i class="fa fa-fw fa-mars"></i>
-- 年龄　　<script>document.write(new Date().getFullYear() - 1997)</script>
-- 出生日期　1997年2月13日
+- 年龄　　<script>document.write(new Date().getFullYear() - 1993)</script>
+- 出生日期　1993年2月13日
 - 电子邮箱　[hungtcs@163.com<i class="fa fa-fw fa-envelope-o"></i>](mailto:hungtcs@163.com)
 - 移动电话　[18813110072<i class="fa fa-fw fa-phone"></i>](tel:18813110072)
 - Github　[https://github.com/hungtcs<i class="fa fa-fw fa-link"></i>](https://github.com/hungtcs)
