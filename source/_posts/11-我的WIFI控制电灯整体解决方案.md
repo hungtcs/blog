@@ -124,3 +124,5 @@ void loop(void){
 <iframe width="560" height="315" src="https://www.youtube.com/embed/vCTM-Y2L2Yg" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
 ### 视频中的源代码
+- https://github.com/hungtcs-lab/ionic-esp01-relay-controller
+- https://github.com/hungtcs-lab/esp01-relay-manager
