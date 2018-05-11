@@ -123,6 +123,8 @@ void loop(void){
 ### 我的完整解决方案
 <iframe width="560" height="315" src="https://www.youtube.com/embed/vCTM-Y2L2Yg" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
+<iframe width="100%;" height="462" src="//player.bilibili.com/player.html?aid=23103523&cid=38435705&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen> </iframe>
+
 ### 视频中的源代码
 - https://github.com/hungtcs-lab/ionic-esp01-relay-controller
 - https://github.com/hungtcs-lab/esp01-relay-manager
