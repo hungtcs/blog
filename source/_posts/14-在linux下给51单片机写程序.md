@@ -18,6 +18,8 @@ tags:
 - [stcflash]
   > 使用python编写的一个开源跨平台的stc单片机烧写工具
 
+<!-- more -->
+
 ### 步骤
 1. 安装sdcc与stcflash
   sdcc可以使用包管理器安装或通过源码安装。
