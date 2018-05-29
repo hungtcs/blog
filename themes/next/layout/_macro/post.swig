@@ -22,13 +22,13 @@
     <link itemprop="mainEntityOfPage" href="{{ config.url }}{{ url_for(post.path) }}">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="{{ theme.author }}">
-      <meta itemprop="description" content="{{ theme.signature }}">
-      <meta itemprop="image" content="{{ url_for( theme.avatar | default(theme.images + '/avatar.gif') ) }}">
+      <meta itemprop="name" content="{{ author }}">
+      <meta itemprop="description" content="{{ description }}">
+      <meta itemprop="image" content="{{ url_for( theme.avatar.url | default(theme.images + '/avatar.gif') ) }}">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="{{ config.title }}">
+      <meta itemprop="name" content="{{ title }}">
     </span>
 
     {% if not headlessPost %}
@@ -56,16 +56,28 @@
                     <i class="fa fa-thumb-tack"></i>
                   </span>
                 {% endif %}
-                <a class="post-title-link" href="{{ url_for(post.path) }}" itemprop="url">{#
-                #}{{ post.title | default(__('post.untitled'))}}{#
-              #}</a>{#
-            #}{% else %}{{ post.title }}{% endif %}{#
-          #}{% endif %}{#
-        #}</{% if theme.seo %}h2{% else %}h1{% endif %}>
+                <a class="post-title-link" href="{{ url_for(post.path) }}" itemprop="url">
+                  {{ post.title | default(__('post.untitled'))}}
+                </a>
+              {% else -%}
+                {{- post.title -}}
+                {% if theme.post_edit.enable -%}
+                  <a href="{{ theme.post_edit.url }}{{ post.source.slice(7) }}" class="post-edit-link" title="{{ __('post.edit') }}" target="_blank">
+                    <i class="fa fa-pencil"></i>
+                  </a>
+                {%- endif %}
+              {% endif %}
+            {% endif %}
+          </{% if theme.seo %}h2{% else %}h1{% endif %}>
         {% endif %}
 
         <div class="post-meta">
           <span class="post-time">
+
+            {% set date_diff = date(post.date) != date(post.updated) %}
+            {% set time_diff = time(post.date) != time(post.updated) %}
+            {% set datetime_diff = date_diff or time_diff %}
+
             {% if theme.post_meta.created_at %}
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
@@ -73,32 +85,40 @@
               {% if theme.post_meta.item_text %}
                 <span class="post-meta-item-text">{{ __('post.posted') }}</span>
               {% endif %}
-              <time title="{{ __('post.created') }}" itemprop="dateCreated datePublished" datetime="{{ moment(post.date).format() }}">{#
-              #}{{ date(post.date, config.date_format) }}{#
-            #}</time>
+
+              {% if !date_diff && time_diff && theme.post_meta.updated_at.enabled && theme.post_meta.updated_at.another_day %}
+                {% set create_title = __('post.created') + __('symbol.colon') + full_date(post.date) + ' / ' + __('post.modified') + __('symbol.colon') + time(post.updated) %}
+              {% else %}
+                {% set create_title = __('post.created') + __('symbol.colon') + full_date(post.date) %}
+              {% endif %}
+
+              <time title="{{ create_title }}" itemprop="dateCreated datePublished" datetime="{{ moment(post.date).format() }}">{#
+              #}{{ date(post.date) -}}
+              </time>
             {% endif %}
 
-            {% set date_updated_diff = date(post.date, config.date_format) != date(post.updated, config.date_format) %}
-            {% if theme.post_meta.updated_at %}
-              {% if !theme.post_meta.updated_diff || theme.post_meta.updated_diff && date_updated_diff %}
-                {% set display_updated = true %}
-              {% endif %}
-            {% endif %}
+            {% if theme.post_meta.updated_at.enabled && datetime_diff %}
+              {% set display_updated = !theme.post_meta.updated_at.another_day || theme.post_meta.updated_at.another_day && date_diff %}
 
-            {% if display_updated or (!theme.post_meta.created_at and theme.post_meta.updated_at) %}
-              {% if theme.post_meta.created_at and theme.post_meta.updated_at %}
-              <span class="post-meta-divider">|</span>
-              {% endif %}
+              {% if display_updated or !theme.post_meta.created_at %}
+                {% if theme.post_meta.created_at and theme.post_meta.updated_at.enabled %}
+                <span class="post-meta-divider">|</span>
+                {% endif %}
 
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-check-o"></i>
-              </span>
-              {% if theme.post_meta.item_text %}
-                <span class="post-meta-item-text">{{ __('post.modified') + __('symbol.colon') }}</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                {% if theme.post_meta.item_text %}
+                  <span class="post-meta-item-text">{{ __('post.edited') }}</span>
+                {% endif %}
+                <time title="{{ __('post.modified') + __('symbol.colon') + full_date(post.updated) }}" itemprop="dateModified" datetime="{{ moment(post.updated).format() }}">{#
+                #}{% if date_diff -%}
+                    {{- date(post.updated) -}}
+                  {%- else -%}
+                    {{- time(post.updated) -}}
+                  {%- endif -%}
+                </time>
               {% endif %}
-              <time title="{{ __('post.modified') }}" itemprop="dateModified" datetime="{{ moment(post.updated).format() }}">{#
-              #}{{ date(post.updated, config.date_format) }}{#
-            #}</time>
             {% endif %}
           </span>
 
@@ -146,6 +166,9 @@
                   <i class="fa fa-comment-o"></i>
                 </span>
                 <a href="{{ url_for(post.path) }}#comments" itemprop="discussionUrl">
+                {% if __('disqus') !== 'disqus' -%}
+                  <span class="post-meta-item-text">{{ __('post.comments_count') + __('symbol.colon') }}</span>
+                {% endif %}
                   <span class="post-comments-count disqus-comment-count"
                         data-disqus-identifier="{{ post.path }}" itemprop="commentCount"></span>
                 </a>
@@ -235,9 +258,9 @@
                   <i class="fa fa-file-word-o"></i>
                 </span>
                 {% if theme.symbols_count_time.item_text_post %}
-                  <span class="post-meta-item-text">{{ __('post.symbols_count') + __('symbol.colon') }}</span>
+                  <span class="post-meta-item-text">{{ __('symbols_count_time.count') + __('symbol.colon') }}</span>
                 {% endif %}
-                <span title="{{ __('post.symbols_count') }}">{#
+                <span title="{{ __('symbols_count_time.count') }}">{#
                 #}{{ symbolsCount(post.content) }}{#
               #}</span>
               {% endif %}
@@ -251,10 +274,10 @@
                   <i class="fa fa-clock-o"></i>
                 </span>
                 {% if theme.symbols_count_time.item_text_post %}
-                  <span class="post-meta-item-text">{{ __('post.symbols_time') }}&asymp;</span>
+                  <span class="post-meta-item-text">{{ __('symbols_count_time.time') }} &asymp;</span>
                 {% endif %}
-                <span title="{{ __('post.symbols_time') }}">{#
-                #}{{ symbolsTime(post.content, theme.symbols_count_time.awl, theme.symbols_count_time.wpm) }}{#
+                <span title="{{ __('symbols_count_time.time') }}">{#
+                #}{{ symbolsTime(post.content, theme.symbols_count_time.awl, theme.symbols_count_time.wpm, __('symbols_count_time.time_minutes')) }}{#
               #}</span>
               {% endif %}
             </div>
@@ -308,7 +331,7 @@
           {{ post.excerpt }}
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="{{ url_for(post.path) }}{% if theme.scroll_to_more %}#{{ __('post.more') }}{% endif %}" rel="contents">
+            <a class="btn" href="{{ url_for(post.path) }}{% if theme.scroll_to_more %}#more{% endif %}" rel="contents">
               {{ __('post.read_more') }} &raquo;
             </a>
           </div>
@@ -319,7 +342,7 @@
           {% if content.length > theme.auto_excerpt.length %}...{% endif %}
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="{{ url_for(post.path) }}{% if theme.scroll_to_more %}#{{ __('post.more') }}{% endif %}" rel="contents">
+            <a class="btn" href="{{ url_for(post.path) }}{% if theme.scroll_to_more %}#more{% endif %}" rel="contents">
               {{ __('post.read_more') }} &raquo;
             </a>
           </div>
