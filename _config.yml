@@ -106,3 +106,9 @@ deploy:
     repo: https://hungtcs@gitee.com/hungtcs/blog.git
     branch: web-site
   - type: baidu_url_submitter
+
+
+browsersync:
+  logLevel: "warn"
+  ghostMode:
+    scroll: true
