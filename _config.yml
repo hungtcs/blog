@@ -102,9 +102,9 @@ baidu_url_submit:
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   - type: git
-    # repo: https://hungtcs@github.com/hungtcs/blog.git
-    repo: https://hungtcs@gitee.com/hungtcs/blog.git
-    branch: web-site
+    repo: https://hungtcs@github.com/hungtcs/blog.git
+    # repo: https://hungtcs@gitee.com/hungtcs/blog.git
+    branch: gh-pages
   - type: baidu_url_submitter
 
 
