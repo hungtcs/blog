@@ -64,10 +64,13 @@ comments: false
     全屏滚动设计，主要作用是展示年终总结。提供电脑版和手机版
 10. **中国电建元旦工作总结主题页** *2017-12 ~ 2017-12*
     全屏滚动设计，主要作用是展示年终总结。提供电脑版和手机版
-11. **中国电建数据报送平台2.0**  *2018-01 ~ 至今*
+11. **中国电建数据报送平台2.0**  *2018-01 ~ 2018-05*
     后端基于普源平台提供`RESTful`，前端使用`angular v1.2.3`以兼容旧版IE。主要功能是数据报表的报送、审核的功能。(细节不便透露)
-12. **中国电建子企业法人信息报送系统** *2018-03 ~ 至今*
+12. **中国电建子企业法人信息报送系统** *2018-03 ~ 2018-06*
     后端基于普源平台提供`RESTful`，前端使用`angular v1.2.3`以兼容旧版IE。主要功能是对子企业法人信息进行报送、审核的功能。(细节不便透露)
+13. **中国电建PPP项目综合统计应用系统** *2018-04 ~ 至今*
+    后端基于普源平台提供`RESTful`，前端使用`angular v1.2.3`以兼容旧版IE。(细节不便透露)
+
 
 ### 个人爱好
 - 最喜欢的操作系统 `elementary-os`、`x-ubuntu`
@@ -80,10 +83,14 @@ comments: false
 ### 业余作品
 - pagination https://gitee.com/hungtcs/pagination
     angular-js分页组件
+- ng-sortable-tabl https://gitee.com/hungtcs/ng-sortable-table
+    angular-js表格排序插件
 - marked-in-html https://gitee.com/hungtcs/marked-in-html
     提供在html中直接书写markdown的支持，同时适用于impress.js
 - markdown-http-server https://www.npmjs.com/package/markdown-http-server
     markdown工具，可以在当前目录启动一个http服务器，提供自动解析Markdown文档功能
+- terminal-image-viewer https://gitee.com/hungtcs/terminal-image-viewer
+    终端彩色图片查看器
 - 8052-clock https://github.com/hungtcs/8052-clock
     使用STC89C52和DS1302芯片做的数码管显示时钟程序
 
