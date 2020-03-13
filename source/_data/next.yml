@@ -76,7 +76,6 @@ menu:
   tags: /tags/ || tags
   categories: /categories/ || th
   archives: /archives/ || archive
-  # 简历: /resume/ || file-text
   #schedule: /schedule/ || calendar
   #sitemap: /sitemap.xml || sitemap
   #commonweal: /404/ || heartbeat
@@ -435,7 +434,7 @@ pangu: false
 #swiftype_key:
 
 # Baidu Analytics ID
-baidu_analytics: e8c935df7e85fcc0bdedac1a5cb80145
+# baidu_analytics: e8c935df7e85fcc0bdedac1a5cb80145
 
 # Disqus
 disqus:
@@ -638,7 +637,7 @@ busuanzi_count:
 
 
 # Enable baidu push so that the blog will push the url to baidu automatically which is very helpful for SEO
-baidu_push: false
+# baidu_push: false
 
 # Google Calendar
 # Share your recent schedule to others via calendar page
