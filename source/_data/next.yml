@@ -434,7 +434,7 @@ pangu: false
 #swiftype_key:
 
 # Baidu Analytics ID
-# baidu_analytics: e8c935df7e85fcc0bdedac1a5cb80145
+baidu_analytics: a8b32306ce37093997d8923fa6bcda22
 
 # Disqus
 disqus:
@@ -598,7 +598,7 @@ rating:
 # Show number of visitors to each article.
 # You can visit https://leancloud.cn get AppID and AppKey.
 leancloud_visitors:
-  enable: true
+  enable: false
   app_id: rnjNEztYLHHIKPuAXdxPlAO1-gzGzoHsz
   app_key: UDavgKx5QGiLUd7nBemxzFjS
   # Dependencies: https://github.com/theme-next/hexo-leancloud-counter-security

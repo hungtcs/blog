@@ -5,7 +5,7 @@
 # Site
 title: 鸿则的博客
 subtitle:
-description: 一块质地不错但是没有灵性的木头
+description: 啦啦啦啦啦
 keywords:
 author: 鸿则
 language: zh-CN
@@ -86,7 +86,7 @@ search:
   limit: 10000
 
 leancloud_counter_security:
-  enable_sync: true
+  enable_sync: false
   app_id: rnjNEztYLHHIKPuAXdxPlAO1-gzGzoHsz
   app_key: UDavgKx5QGiLUd7nBemxzFjS
   username:
