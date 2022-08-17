@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="鸿则的博客" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://blog.hungtcs.top').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"b2t":false,"scrollpercent":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="SD卡简介SD卡（Secure Digital Memory Card）的技术建是基于MultiMedia卡（MMC）格式上发展而来，大小和MMC差不多，SD卡与MMC卡保持着向上兼容，也就是说，MMC可以被新的SD设备存取，兼容性则取决于应用软件，但SD卡却不可以被MMC设备存取。（SD卡外型采用了与MMC厚度一样的导轨式设计，以使SD设备可以适合MMC)。 设有SD卡插槽的设备能够使用较簿身的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="21. SD卡介绍">
+<meta property="og:url" content="https://blog.hungtcs.top/2019/03/24/21-SD%E5%8D%A1%E4%BB%8B%E7%BB%8D/index.html">
+<meta property="og:site_name" content="鸿则的博客">
+<meta property="og:description" content="SD卡简介SD卡（Secure Digital Memory Card）的技术建是基于MultiMedia卡（MMC）格式上发展而来，大小和MMC差不多，SD卡与MMC卡保持着向上兼容，也就是说，MMC可以被新的SD设备存取，兼容性则取决于应用软件，但SD卡却不可以被MMC设备存取。（SD卡外型采用了与MMC厚度一样的导轨式设计，以使SD设备可以适合MMC)。 设有SD卡插槽的设备能够使用较簿身的">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog.hungtcs.top/2019/03/24/21-SD%E5%8D%A1%E4%BB%8B%E7%BB%8D/sd-card-specs.png">
+<meta property="og:image" content="https://blog.hungtcs.top/2019/03/24/21-SD%E5%8D%A1%E4%BB%8B%E7%BB%8D/classes.png">
+<meta property="og:image" content="https://blog.hungtcs.top/2019/03/24/21-SD%E5%8D%A1%E4%BB%8B%E7%BB%8D/sd-pins.png">
+<meta property="og:image" content="https://blog.hungtcs.top/2019/03/24/21-SD%E5%8D%A1%E4%BB%8B%E7%BB%8D/regs.png">
+<meta property="og:image" content="https://blog.hungtcs.top/2019/03/24/21-SD%E5%8D%A1%E4%BB%8B%E7%BB%8D/sd-bus-lines.png">
+<meta property="og:image" content="https://blog.hungtcs.top/2019/03/24/21-SD%E5%8D%A1%E4%BB%8B%E7%BB%8D/spi-lines.png">
+<meta property="og:image" content="https://blog.hungtcs.top/2019/03/24/21-SD%E5%8D%A1%E4%BB%8B%E7%BB%8D/command-frame.png">
+<meta property="article:published_time" content="2019-03-24T04:59:37.000Z">
+<meta property="article:modified_time" content="2022-08-17T02:40:45.592Z">
+<meta property="article:author" content="鸿则">
+<meta property="article:tag" content="SD">
+<meta property="article:tag" content="SD卡">
+<meta property="article:tag" content="SPI">
+<meta property="article:tag" content="SDIO">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog.hungtcs.top/2019/03/24/21-SD%E5%8D%A1%E4%BB%8B%E7%BB%8D/sd-card-specs.png">
+
+<link rel="canonical" href="https://blog.hungtcs.top/2019/03/24/21-SD%E5%8D%A1%E4%BB%8B%E7%BB%8D/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>21. SD卡介绍 | 鸿则的博客</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?a8b32306ce37093997d8923fa6bcda22";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">鸿则的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://blog.hungtcs.top/2019/03/24/21-SD%E5%8D%A1%E4%BB%8B%E7%BB%8D/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://www.gravatar.com/avatar/90e7b4b3cf7d73f04e6af073141f2d7c.jpg?s=256">
+      <meta itemprop="name" content="鸿则">
+      <meta itemprop="description" content="啦啦啦啦啦">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="鸿则的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          21. SD卡介绍
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-03-24 12:59:37" itemprop="dateCreated datePublished" datetime="2019-03-24T12:59:37+08:00">2019-03-24</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-08-17 10:40:45" itemprop="dateModified" datetime="2022-08-17T10:40:45+08:00">2022-08-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%95%E7%89%87%E6%9C%BA/" itemprop="url" rel="index">
+                    <span itemprop="name">单片机</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%95%E7%89%87%E6%9C%BA/%E5%A4%96%E8%AE%BE/" itemprop="url" rel="index">
+                    <span itemprop="name">外设</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%95%E7%89%87%E6%9C%BA/%E5%A4%96%E8%AE%BE/SD/" itemprop="url" rel="index">
+                    <span itemprop="name">SD</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="SD卡简介"><a href="#SD卡简介" class="headerlink" title="SD卡简介"></a>SD卡简介</h3><p>SD卡（Secure Digital Memory Card）的技术建是基于MultiMedia卡（MMC）格式上发展而来，大小和MMC差不多，SD卡与MMC卡保持着向上兼容，也就是说，MMC可以被新的SD设备存取，兼容性则取决于应用软件，但SD卡却不可以被MMC设备存取。（SD卡外型采用了与MMC厚度一样的导轨式设计，以使SD设备可以适合MMC)。</p>
+<p>设有SD卡插槽的设备能够使用较簿身的MMC卡，但是标准的SD卡却不能插入到MMC卡插槽。SD卡能够于CF卡和PCMCIA卡上，插上转接器使用；
+而miniSD卡和microSD卡亦能插上转接器于SD卡插槽使用。</p>
+<img src="/2019/03/24/21-SD%E5%8D%A1%E4%BB%8B%E7%BB%8D/sd-card-specs.png" class="">
+<img src="/2019/03/24/21-SD%E5%8D%A1%E4%BB%8B%E7%BB%8D/classes.png" class="">
+<span id="more"></span>
+<h3 id="SD卡的引脚定义"><a href="#SD卡的引脚定义" class="headerlink" title="SD卡的引脚定义"></a>SD卡的引脚定义</h3><img src="/2019/03/24/21-SD%E5%8D%A1%E4%BB%8B%E7%BB%8D/sd-pins.png" class="">
+<h3 id="寄存器"><a href="#寄存器" class="headerlink" title="寄存器"></a>寄存器</h3><img src="/2019/03/24/21-SD%E5%8D%A1%E4%BB%8B%E7%BB%8D/regs.png" class="">
+<table>
+<thead>
+<tr>
+<th style="text-align:left">名称</th>
+<th style="text-align:left">宽度</th>
+<th style="text-align:left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">CID</td>
+<td style="text-align:left">128</td>
+<td style="text-align:left">卡标识号</td>
+</tr>
+<tr>
+<td style="text-align:left">RCA</td>
+<td style="text-align:left">16</td>
+<td style="text-align:left">相对卡地址（Relative Card Address）：本地系统中卡的地址，<br />动态变化，在主机初始化的时候确定。<br /><strong>SPI模式中没有</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">CSD</td>
+<td style="text-align:left">128</td>
+<td style="text-align:left">卡的描述数据：卡操作条件的相关的信息数据</td>
+</tr>
+<tr>
+<td style="text-align:left">SCR</td>
+<td style="text-align:left">64</td>
+<td style="text-align:left">SD配置寄存器：SD卡特定的信息数据</td>
+</tr>
+<tr>
+<td style="text-align:left">OCR</td>
+<td style="text-align:left">32</td>
+<td style="text-align:left">操作条件寄存器</td>
+</tr>
+</tbody>
+</table>
+<h3 id="CID-寄存器"><a href="#CID-寄存器" class="headerlink" title="CID 寄存器"></a>CID 寄存器</h3><p>CID寄存器长度为<code>16个字节</code>的卡唯一标识号，该号在生产厂家编程后无法更改。
+<em>SD和MMC卡的CID寄存器结构不一样。</em></p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>类型</th>
+<th>宽度</th>
+<th>CID位</th>
+<th>内容</th>
+<th>CID值（例）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>厂商ID</td>
+<td>Binary</td>
+<td>8</td>
+<td>[127:120]</td>
+<td>SD卡协会管理和分配</td>
+<td>0x03</td>
+</tr>
+<tr>
+<td>OEM/Application ID（OID）</td>
+<td>ASCII</td>
+<td>16</td>
+<td>[119:104]</td>
+<td>识别卡的OEM或卡内容，由制造商分配</td>
+<td>0x53, 0x44</td>
+</tr>
+<tr>
+<td>产品名（PNM）</td>
+<td>ASCII</td>
+<td>40</td>
+<td>[103:64]</td>
+<td>5个ASCII字符</td>
+<td>SD128</td>
+</tr>
+<tr>
+<td>产品版本（PRV）</td>
+<td>BCD</td>
+<td>8</td>
+<td>[65:56]</td>
+<td>2个2进制编码的十进制数</td>
+<td>30</td>
+</tr>
+<tr>
+<td>序列号（PSN）</td>
+<td>Binary</td>
+<td>32</td>
+<td>[55:24]</td>
+<td>32位无符号证书</td>
+<td></td>
+</tr>
+<tr>
+<td>保留</td>
+<td></td>
+<td>4</td>
+<td>[23:20]</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>生产日期（MDT）</td>
+<td>BCD</td>
+<td>12</td>
+<td>[19:8]</td>
+<td>YYM（从2000年的偏移量）</td>
+<td>0x014（Apr 2001）</td>
+</tr>
+<tr>
+<td>CRC7校验和（CRC）</td>
+<td>Binary</td>
+<td>7</td>
+<td>[7:1]</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>未用</td>
+<td></td>
+<td>1</td>
+<td>[0:0]</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="SD-Bus-Mode"><a href="#SD-Bus-Mode" class="headerlink" title="SD Bus Mode"></a>SD Bus Mode</h3><img src="/2019/03/24/21-SD%E5%8D%A1%E4%BB%8B%E7%BB%8D/sd-bus-lines.png" class="">
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Pin#</th>
+<th style="text-align:left">Nmae</th>
+<th style="text-align:left">Type1</th>
+<th style="text-align:left">SD Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:left">CD/DAT3</td>
+<td style="text-align:left">I/O</td>
+<td style="text-align:left">Card Detect / Data Line [Bit 3]</td>
+</tr>
+<tr>
+<td style="text-align:left">2</td>
+<td style="text-align:left">CMD</td>
+<td style="text-align:left">I/O</td>
+<td style="text-align:left">Cmmand / Response</td>
+</tr>
+<tr>
+<td style="text-align:left">3</td>
+<td style="text-align:left">VSS1</td>
+<td style="text-align:left">S</td>
+<td style="text-align:left">Supply Voltage Ground</td>
+</tr>
+<tr>
+<td style="text-align:left">4</td>
+<td style="text-align:left">VDD</td>
+<td style="text-align:left">S</td>
+<td style="text-align:left">Supply Voltage</td>
+</tr>
+<tr>
+<td style="text-align:left">5</td>
+<td style="text-align:left">CLK</td>
+<td style="text-align:left">I</td>
+<td style="text-align:left">Clock</td>
+</tr>
+<tr>
+<td style="text-align:left">6</td>
+<td style="text-align:left">VSS2</td>
+<td style="text-align:left">S</td>
+<td style="text-align:left">Supply Voltage Ground</td>
+</tr>
+<tr>
+<td style="text-align:left">7</td>
+<td style="text-align:left">DAT0</td>
+<td style="text-align:left">I/O</td>
+<td style="text-align:left">Data Line [Bit 0]</td>
+</tr>
+<tr>
+<td style="text-align:left">8</td>
+<td style="text-align:left">DAT1</td>
+<td style="text-align:left">I/O</td>
+<td style="text-align:left">Data Line [Bit 1]</td>
+</tr>
+<tr>
+<td style="text-align:left">9</td>
+<td style="text-align:left">DAT2</td>
+<td style="text-align:left">I/O</td>
+<td style="text-align:left">Data Line [Bit 2]</td>
+</tr>
+</tbody>
+</table>
+<h3 id="SPI-Bus-Mode-引脚定义"><a href="#SPI-Bus-Mode-引脚定义" class="headerlink" title="SPI Bus Mode 引脚定义"></a>SPI Bus Mode 引脚定义</h3><img src="/2019/03/24/21-SD%E5%8D%A1%E4%BB%8B%E7%BB%8D/spi-lines.png" class="" title="要加上10～100K的上拉电阻">
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Pin#</th>
+<th style="text-align:left">Nmae</th>
+<th style="text-align:left">Type1</th>
+<th style="text-align:left">SPI Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:left">CS</td>
+<td style="text-align:left">I</td>
+<td style="text-align:left">Chip Select(Active Low)</td>
+</tr>
+<tr>
+<td style="text-align:left">2</td>
+<td style="text-align:left">MOSI</td>
+<td style="text-align:left">I</td>
+<td style="text-align:left">Host To Card</td>
+</tr>
+<tr>
+<td style="text-align:left">3</td>
+<td style="text-align:left">VSS1</td>
+<td style="text-align:left">S</td>
+<td style="text-align:left">Supply Voltage Ground</td>
+</tr>
+<tr>
+<td style="text-align:left">4</td>
+<td style="text-align:left">VDD</td>
+<td style="text-align:left">S</td>
+<td style="text-align:left">Supply Voltage</td>
+</tr>
+<tr>
+<td style="text-align:left">5</td>
+<td style="text-align:left">CLK</td>
+<td style="text-align:left">I</td>
+<td style="text-align:left">Clock</td>
+</tr>
+<tr>
+<td style="text-align:left">6</td>
+<td style="text-align:left">VSS2</td>
+<td style="text-align:left">S</td>
+<td style="text-align:left">Supply Voltage Ground</td>
+</tr>
+<tr>
+<td style="text-align:left">7</td>
+<td style="text-align:left">MISO</td>
+<td style="text-align:left">O</td>
+<td style="text-align:left">Card To Host</td>
+</tr>
+<tr>
+<td style="text-align:left">8</td>
+<td style="text-align:left">RSV</td>
+<td style="text-align:left">I</td>
+<td style="text-align:left">Reserved</td>
+</tr>
+<tr>
+<td style="text-align:left">9</td>
+<td style="text-align:left">RSV</td>
+<td style="text-align:left">I</td>
+<td style="text-align:left">Reserved</td>
+</tr>
+</tbody>
+</table>
+<h3 id="SPI通信协议与命令"><a href="#SPI通信协议与命令" class="headerlink" title="SPI通信协议与命令"></a>SPI通信协议与命令</h3><p>SD卡的指令由6个字节组成。
+字节1的最高两位固定为01, 低6位为命令号（例：CMD16为10000即0x10，完成的CMD16第一个字节为01010000）。
+字节2～5为命令参数。
+字节6的高7位为CRC值，最低位固定为1。</p>
+<img src="/2019/03/24/21-SD%E5%8D%A1%E4%BB%8B%E7%BB%8D/command-frame.png" class="">
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SD/" rel="tag"># SD</a>
+              <a href="/tags/SD%E5%8D%A1/" rel="tag"># SD卡</a>
+              <a href="/tags/SPI/" rel="tag"># SPI</a>
+              <a href="/tags/SDIO/" rel="tag"># SDIO</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/07/23/20-Ubuntu-Debian-%E5%AE%89%E8%A3%85ST-link%E7%9A%84%E8%BF%87%E7%A8%8B%E5%92%8C%E6%96%B9%E6%B3%95/" rel="prev" title="20. Ubuntu/Debian 安装ST-link的过程和方法">
+      <i class="fa fa-chevron-left"></i> 20. Ubuntu/Debian 安装ST-link的过程和方法
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/09/06/22-%E7%AE%80%E5%8D%95%E5%AE%9E%E7%8E%B0%E7%B1%BB%E4%BC%BCAngular%E7%9A%84%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5%E5%8A%9F%E8%83%BD/" rel="next" title="22. 简单实现类似Angular的依赖注入功能">
+      22. 简单实现类似Angular的依赖注入功能 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#SD%E5%8D%A1%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">SD卡简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SD%E5%8D%A1%E7%9A%84%E5%BC%95%E8%84%9A%E5%AE%9A%E4%B9%89"><span class="nav-number">2.</span> <span class="nav-text">SD卡的引脚定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">3.</span> <span class="nav-text">寄存器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CID-%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">4.</span> <span class="nav-text">CID 寄存器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SD-Bus-Mode"><span class="nav-number">5.</span> <span class="nav-text">SD Bus Mode</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SPI-Bus-Mode-%E5%BC%95%E8%84%9A%E5%AE%9A%E4%B9%89"><span class="nav-number">6.</span> <span class="nav-text">SPI Bus Mode 引脚定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SPI%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE%E4%B8%8E%E5%91%BD%E4%BB%A4"><span class="nav-number">7.</span> <span class="nav-text">SPI通信协议与命令</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="鸿则"
+      src="https://www.gravatar.com/avatar/90e7b4b3cf7d73f04e6af073141f2d7c.jpg?s=256">
+  <p class="site-author-name" itemprop="name">鸿则</p>
+  <div class="site-description" itemprop="description">啦啦啦啦啦</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hungtcs" title="hungtcs → https://github.com/hungtcs" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>hungtcs</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/hungtcs" title="hungtcs-lab → https://github.com/hungtcs" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>hungtcs-lab</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.youtube.com/channel/UCmGaZOmnP5qx8bbdsPrBPtg" title="YouTube → https://www.youtube.com/channel/UCmGaZOmnP5qx8bbdsPrBPtg" rel="noopener" target="_blank"><i class="fa fa-fw fa-youtube"></i>YouTube</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:hungtcs@163.com" title="E-Mail → mailto:hungtcs@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">鸿则</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v6.0.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

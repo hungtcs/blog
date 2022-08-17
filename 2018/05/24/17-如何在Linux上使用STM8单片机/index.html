@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="鸿则的博客" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://blog.hungtcs.top').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"b2t":false,"scrollpercent":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="在上一篇文章中，我们看了一下廉价的STM8开发板和编程使用的ST-Link。现在是时候采取一些行动了！ 环境配置实例程序和文档先阅读一些资料是一个良好的开端。 ST提供大量关于STM8S103F3的免费资料，该页面还列出了微控制器的所有主要功能，如果你想看的话。 如果你按照我的步骤开始的话，我推荐你另外阅读一下SDCC的用户手册，以便了了解SDCC编译器的特殊语法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="17. 如何在Linux上使用STM8单片机">
+<meta property="og:url" content="https://blog.hungtcs.top/2018/05/24/17-%E5%A6%82%E4%BD%95%E5%9C%A8Linux%E4%B8%8A%E4%BD%BF%E7%94%A8STM8%E5%8D%95%E7%89%87%E6%9C%BA/index.html">
+<meta property="og:site_name" content="鸿则的博客">
+<meta property="og:description" content="在上一篇文章中，我们看了一下廉价的STM8开发板和编程使用的ST-Link。现在是时候采取一些行动了！ 环境配置实例程序和文档先阅读一些资料是一个良好的开端。 ST提供大量关于STM8S103F3的免费资料，该页面还列出了微控制器的所有主要功能，如果你想看的话。 如果你按照我的步骤开始的话，我推荐你另外阅读一下SDCC的用户手册，以便了了解SDCC编译器的特殊语法。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog.hungtcs.top/2018/05/24/17-%E5%A6%82%E4%BD%95%E5%9C%A8Linux%E4%B8%8A%E4%BD%BF%E7%94%A8STM8%E5%8D%95%E7%89%87%E6%9C%BA/01.jpg">
+<meta property="og:image" content="https://blog.hungtcs.top/2018/05/24/17-%E5%A6%82%E4%BD%95%E5%9C%A8Linux%E4%B8%8A%E4%BD%BF%E7%94%A8STM8%E5%8D%95%E7%89%87%E6%9C%BA/02.jpg">
+<meta property="og:image" content="https://blog.hungtcs.top/2018/05/24/17-%E5%A6%82%E4%BD%95%E5%9C%A8Linux%E4%B8%8A%E4%BD%BF%E7%94%A8STM8%E5%8D%95%E7%89%87%E6%9C%BA/03.jpg">
+<meta property="og:image" content="https://blog.hungtcs.top/2018/05/24/17-%E5%A6%82%E4%BD%95%E5%9C%A8Linux%E4%B8%8A%E4%BD%BF%E7%94%A8STM8%E5%8D%95%E7%89%87%E6%9C%BA/04.jpg">
+<meta property="og:image" content="https://blog.hungtcs.top/2018/05/24/17-%E5%A6%82%E4%BD%95%E5%9C%A8Linux%E4%B8%8A%E4%BD%BF%E7%94%A8STM8%E5%8D%95%E7%89%87%E6%9C%BA/05.jpg">
+<meta property="og:image" content="https://blog.hungtcs.top/2018/05/24/17-%E5%A6%82%E4%BD%95%E5%9C%A8Linux%E4%B8%8A%E4%BD%BF%E7%94%A8STM8%E5%8D%95%E7%89%87%E6%9C%BA/06.jpg">
+<meta property="article:published_time" content="2018-05-24T08:25:17.000Z">
+<meta property="article:modified_time" content="2022-08-17T02:40:45.588Z">
+<meta property="article:author" content="鸿则">
+<meta property="article:tag" content="stm8">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog.hungtcs.top/2018/05/24/17-%E5%A6%82%E4%BD%95%E5%9C%A8Linux%E4%B8%8A%E4%BD%BF%E7%94%A8STM8%E5%8D%95%E7%89%87%E6%9C%BA/01.jpg">
+
+<link rel="canonical" href="https://blog.hungtcs.top/2018/05/24/17-%E5%A6%82%E4%BD%95%E5%9C%A8Linux%E4%B8%8A%E4%BD%BF%E7%94%A8STM8%E5%8D%95%E7%89%87%E6%9C%BA/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>17. 如何在Linux上使用STM8单片机 | 鸿则的博客</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?a8b32306ce37093997d8923fa6bcda22";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">鸿则的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://blog.hungtcs.top/2018/05/24/17-%E5%A6%82%E4%BD%95%E5%9C%A8Linux%E4%B8%8A%E4%BD%BF%E7%94%A8STM8%E5%8D%95%E7%89%87%E6%9C%BA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://www.gravatar.com/avatar/90e7b4b3cf7d73f04e6af073141f2d7c.jpg?s=256">
+      <meta itemprop="name" content="鸿则">
+      <meta itemprop="description" content="啦啦啦啦啦">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="鸿则的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          17. 如何在Linux上使用STM8单片机
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-05-24 16:25:17" itemprop="dateCreated datePublished" datetime="2018-05-24T16:25:17+08:00">2018-05-24</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-08-17 10:40:45" itemprop="dateModified" datetime="2022-08-17T10:40:45+08:00">2022-08-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%95%E7%89%87%E6%9C%BA/" itemprop="url" rel="index">
+                    <span itemprop="name">单片机</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%95%E7%89%87%E6%9C%BA/stm8/" itemprop="url" rel="index">
+                    <span itemprop="name">stm8</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在上一篇文章中，我们看了一下廉价的STM8开发板和编程使用的ST-Link。现在是时候采取一些行动了！</p>
+<h3 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h3><h4 id="实例程序和文档"><a href="#实例程序和文档" class="headerlink" title="实例程序和文档"></a>实例程序和文档</h4><p>先阅读一些资料是一个良好的开端。</p>
+<p>ST提供大量关于<a target="_blank" rel="noopener" href="http://www.st.com/en/microcontrollers/stm8s103f3.html">STM8S103F3</a>的免费资料，<a target="_blank" rel="noopener" href="http://www.st.com/en/microcontrollers/stm8s103f3.html">该页面</a>还列出了微控制器的所有主要功能，如果你想看的话。</p>
+<p>如果你按照我的步骤开始的话，我推荐你另外阅读一下<a target="_blank" rel="noopener" href="http://sdcc.sourceforge.net/doc/sdccman.pdf">SDCC的用户手册</a>，以便了了解SDCC编译器的特殊语法。</p>
+<span id="more"></span>
+<h4 id="编程软件"><a href="#编程软件" class="headerlink" title="编程软件"></a>编程软件</h4><p><strong>本指南是为Arch Linux编写的，其他发行版的用户可能会发现某些指令不能运行，请根据需要调整</strong></p>
+<p>在Linux上开发STM8单片机需要下面两个软件的配合：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/vdudouyt/stm8flash">stm8flash</a> 一个用于链接ST-Link的软件适配器</li>
+<li><a target="_blank" rel="noopener" href="http://sdcc.sourceforge.net/">sdcc</a> 一个编译器</li>
+</ul>
+<p>ST还提供了一些其他为STM8编程的<a target="_blank" rel="noopener" href="http://www.st.com/en/development-tools/stm8-software-development-tools.html">编译器或工具</a>，
+但是他们只可以运行在windows上，或许你可以通过wine软件来运行，但是这都不是一个好办法。</p>
+<p><em>如果你还打算使用ST-Link对STM32进行开发，你应该还需要安装<a target="_blank" rel="noopener" href="https://www.archlinux.org/packages/?q=stlink">community/stlink</a></em></p>
+<p>您可能需要也可能不需要以下内容<code>/etc/udev/rules.d/49-stlinkv2.rules</code>，
+我忘记了这是从哪里复制回来的了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"># stm32 discovery boards, with onboard st/linkv2</span><br><span class="line"># ie, STM32L, STM32F4.</span><br><span class="line"># STM32VL has st/linkv1, which is quite different</span><br><span class="line"></span><br><span class="line">SUBSYSTEMS==&quot;usb&quot;, ATTRS&#123;idVendor&#125;==&quot;0483&quot;, ATTRS&#123;idProduct&#125;==&quot;3748&quot;, \</span><br><span class="line">    MODE:=&quot;0666&quot;, \</span><br><span class="line">    SYMLINK+=&quot;stlinkv2_%n&quot;</span><br><span class="line"></span><br><span class="line">SUBSYSTEMS==&quot;usb&quot;, ATTRS&#123;idVendor&#125;==&quot;0483&quot;, ATTRS&#123;idProduct&#125;==&quot;374b&quot;, \</span><br><span class="line">    KERNEL!=&quot;sd*&quot;, KERNEL!=&quot;sg*&quot;, KERNEL!=&quot;tty*&quot;, SUBSYSTEM!=&quot;bsg&quot;, \</span><br><span class="line">    MODE:=&quot;0666&quot;, \</span><br><span class="line">    SYMLINK+=&quot;stlinkv2_%n&quot;</span><br><span class="line"></span><br><span class="line">SUBSYSTEMS==&quot;usb&quot;, ATTRS&#123;idVendor&#125;==&quot;0483&quot;, ATTRS&#123;idProduct&#125;==&quot;374b&quot;, \</span><br><span class="line">    KERNEL==&quot;sd*&quot;, MODE:=&quot;0666&quot;, \</span><br><span class="line">    SYMLINK+=&quot;stlinkv2_disk&quot;</span><br><span class="line"></span><br><span class="line">SUBSYSTEMS==&quot;usb&quot;, ATTRS&#123;idVendor&#125;==&quot;0483&quot;, ATTRS&#123;idProduct&#125;==&quot;374b&quot;, \</span><br><span class="line">    KERNEL==&quot;sg*&quot;, MODE:=&quot;0666&quot;, \</span><br><span class="line">    SYMLINK+=&quot;stlinkv2_raw_scsi&quot;</span><br><span class="line"></span><br><span class="line">SUBSYSTEMS==&quot;usb&quot;, ATTRS&#123;idVendor&#125;==&quot;0483&quot;, ATTRS&#123;idProduct&#125;==&quot;374b&quot;, \</span><br><span class="line">    SUBSYSTEM==&quot;bsg&quot;, MODE:=&quot;0666&quot;, \</span><br><span class="line">    SYMLINK+=&quot;stlinkv2_block_scsi&quot;</span><br><span class="line"></span><br><span class="line">SUBSYSTEMS==&quot;usb&quot;, ATTRS&#123;idVendor&#125;==&quot;0483&quot;, ATTRS&#123;idProduct&#125;==&quot;374b&quot;, \</span><br><span class="line">    KERNEL==&quot;tty*&quot;, MODE:=&quot;0666&quot;, \</span><br><span class="line">    SYMLINK+=&quot;stlinkv2_console&quot;</span><br><span class="line"></span><br><span class="line"># If you share your linux system with other users, or just don&#x27;t like the</span><br><span class="line"># idea of write permission for everybody, you can replace MODE:=&quot;0666&quot; with</span><br><span class="line"># OWNER:=&quot;yourusername&quot; to create the device owned by you, or with</span><br><span class="line"># GROUP:=&quot;somegroupname&quot; and control access using standard unix groups.</span><br></pre></td></tr></table></figure>
+<h4 id="库文件"><a href="#库文件" class="headerlink" title="库文件"></a>库文件</h4><p>SDCC支持STM8，但由于许可原因(booo, ST!)，标准外设库（SPL）是缺失的。</p>
+<p>有人开发了一个使SPL与SDCC兼容的补丁，<a target="_blank" rel="noopener" href="https://github.com/gicking/SPL_2.2.0_SDCC_patch">点击这里</a>
+(这个补丁已经过期了，<a target="_blank" rel="noopener" href="https://github.com/gicking/STM8-SPL_SDCC_patch">点击这里查看另一个更新的</a>)，
+另外有一个AUR软件包试(<a target="_blank" rel="noopener" href="https://aur.archlinux.org/packages/stm8-spl-sdcc/">aur/stm8-spl-sdcc</a>)图将其安装在SDCC库文件夹中,
+但是这些SPL的文件包具有登录和EULA点击保护(but alas the zip with the SPL files is login &amp; EULA-click protected)(booo again, ST!)。</p>
+<p>构建这个软件包的任务非常艰巨！</p>
+<h5 id="下载SPL"><a href="#下载SPL" class="headerlink" title="下载SPL"></a>下载SPL</h5><p>首先，你必须从ST的官网(the evil corporate’s claws)下载SPL包的zip文件。
+<a target="_blank" rel="noopener" href="https://my.st.com/content/my_st_com/en/products/embedded-software/mcus-embedded-software/stm8-embedded-software/stsw-stm8069.html">点击这里</a></p>
+<p>我为此做了一个图片向导：
+<img src="/2018/05/24/17-%E5%A6%82%E4%BD%95%E5%9C%A8Linux%E4%B8%8A%E4%BD%BF%E7%94%A8STM8%E5%8D%95%E7%89%87%E6%9C%BA/01.jpg" class="">
+<img src="/2018/05/24/17-%E5%A6%82%E4%BD%95%E5%9C%A8Linux%E4%B8%8A%E4%BD%BF%E7%94%A8STM8%E5%8D%95%E7%89%87%E6%9C%BA/02.jpg" class="">
+<img src="/2018/05/24/17-%E5%A6%82%E4%BD%95%E5%9C%A8Linux%E4%B8%8A%E4%BD%BF%E7%94%A8STM8%E5%8D%95%E7%89%87%E6%9C%BA/03.jpg" class="">
+<img src="/2018/05/24/17-%E5%A6%82%E4%BD%95%E5%9C%A8Linux%E4%B8%8A%E4%BD%BF%E7%94%A8STM8%E5%8D%95%E7%89%87%E6%9C%BA/04.jpg" class="">
+<img src="/2018/05/24/17-%E5%A6%82%E4%BD%95%E5%9C%A8Linux%E4%B8%8A%E4%BD%BF%E7%94%A8STM8%E5%8D%95%E7%89%87%E6%9C%BA/05.jpg" class="">
+<img src="/2018/05/24/17-%E5%A6%82%E4%BD%95%E5%9C%A8Linux%E4%B8%8A%E4%BD%BF%E7%94%A8STM8%E5%8D%95%E7%89%87%E6%9C%BA/06.jpg" class=""></p>
+<h5 id="打补丁"><a href="#打补丁" class="headerlink" title="打补丁"></a>打补丁</h5><p>在你下载了SPL的压缩包之后，为了让他能在SDCC下使用，我们需要给它打补丁，因为它是为非自由编译器（如Cosmic）制作的。
+虽然通过电子邮件的请求可能可以免费获取Cosmic，但是它只能在windows上使用。</p>
+<p>让我们开始打补丁吧：</p>
+<ol>
+<li>下载AUR软件包，可能使用<code>cower -d stm8-spl-sdcc</code></li>
+<li>将来之不易的<code>en.stsw-stm8069.zip</code>放到PKGBUILD同级，然后重新命名为<code>stsw-stm8069.zip</code>，HASH应该匹配</li>
+<li>先运行<code>mapekpg</code>，接下来再运行<code>sudo pacman -U &lt;the xz file&gt;</code></li>
+</ol>
+<p>非Arch用户可以手动应用这些修补程序</p>
+<p>如果你不喜欢在系统目录中安装这样的东西，你可以简单地从<code>src/STM8S_StdPeriph_Lib</code>复制修补后的SPL，
+然后放到你认为合适的地方（或者直接将<code>libraries/STM8S_StdPeriph_Driver</code>放到你的项目中去）。</p>
+<p>您还可以从<code>src/STM8S_StdPeriph_Lib/Project/STM8S_StdPeriph_Template/SDCC</code>中获取示例Makefile，
+虽然需要一些调整，但是还是有一些参考价值。</p>
+<h3 id="开始你的第一个项目"><a href="#开始你的第一个项目" class="headerlink" title="开始你的第一个项目"></a>开始你的第一个项目</h3><p>在此之前，你应该已经准备好工作环境，并且有一个最小系统开发板。</p>
+<p>你可以点击这个链接下载<a target="_blank" rel="noopener" href="https://www.ondrovo.com/a/20170107-stm8-getting-started/stm8_blinky.zip">实例程序</a>，或者直接下载已经<a target="_blank" rel="noopener" href="https://www.ondrovo.com/a/20170107-stm8-getting-started/stm8_blinky.hex">编译好的ihx文件</a>，前提是你有和我一样的开发板，否则你可能不能直接使用。</p>
+<p>接下来调整<code>makefile</code>里面的SPL路径，然后运行<code>make</code>命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ make</span><br><span class="line">sdcc -mstm8 -lstm8 --opt-code-size -DSTM8S103 -I./src -I/usr/share/sdcc/include/stm8/  -DSKIP_TRAPS=0 -c ./src/stm8s_it.c -o STM8S103/stm8s_it.rel</span><br><span class="line">sdcc -mstm8 -lstm8 --opt-code-size -DSTM8S103 -I./src -I/usr/share/sdcc/include/stm8/  -DSKIP_TRAPS=0 -c ./src/main.c -o STM8S103/main.rel</span><br><span class="line">sdcc -mstm8 -lstm8 --opt-code-size -DSTM8S103 -I./src -I/usr/share/sdcc/include/stm8/  -DSKIP_TRAPS=0 -c /usr/share/sdcc/lib/src/stm8/stm8s_gpio.c -o STM8S103/stm8s_gpio.rel</span><br><span class="line">sdcc -mstm8 -lstm8 --opt-code-size -o ./STM8S103/STM8S103.hex STM8S103/stm8s_it.rel STM8S103/main.rel STM8S103/stm8s_gpio.rel</span><br></pre></td></tr></table></figure>
+<p>之所以makefile里面定一个多个步骤，是因为sdcc无法同时编译多文件。
+首先我们需要将每个<code>.c</code>文件编译到<code>.rel</code>文件(类似于<code>.o</code>文件，不过这是sdcc的版本),
+然后我们再通过这些<code>.rel</code>文件生成二进制文件。</p>
+<h4 id="组织化你的代码"><a href="#组织化你的代码" class="headerlink" title="组织化你的代码"></a>组织化你的代码</h4><p>目前我们的源文件看起来很混乱，大部分原因是因为过多的注释，但是幸好<code>main.c</code>文件里面还算清晰，
+我们的项目基于ST提供的原始项目模板，这也是大部分注释的来源。同样的，STM32也有类似的问题，
+你可以随意清理。</p>
+<p>你也可以将SPL的库文件直接复制到你的项目中，然后进行整理–删除里面的废话。
+(you should be able to simply #define it as no-op in stm8s.h,
+then you save some FLASH bytes by removing the error messages)</p>
+<p>现在你可以直接阅读SPL的源代码了，以便从中获取更多你感兴趣的内容。
+这些文件通过外设的类型分组，像SPI、IIC、UART等等。</p>
+<p>此外，SPL的库文件夹中还有一个大小为6M的chm说明文档，如果你找到办法打开它，它会很有用的。</p>
+<p><strong>如果你选择使用SDCC，你可能会因为它缺少<code>-Wl,--gc-sections</code>等功能而不愉快。
+它总是将整个库文件与代码捆绑在一起，尽管某些函数显然未被使用。
+作为一个解决小文件大小的方法，我把几乎所有的SPL转换成内联函数，
+转换过后的代码可以在这里<a target="_blank" rel="noopener" href="https://github.com/MightyPork/stm8s_inline_spl">下载</a>，
+不过我只做了简单的测试。</strong></p>
+<h3 id="烧写程序"><a href="#烧写程序" class="headerlink" title="烧写程序"></a>烧写程序</h3><p>每个最小系统板在出场之前，都会预先安装一个blink闪烁程序，
+所以你可以直接插上电源就可以看到它开始工作。</p>
+<p>现在你可以链接你的ST-Link开始烧写程序了，
+<strong>不要在使用USB供电的时候同时接通ST-LINK的3.3v到开发板，这有可能会烧坏你的烧写器</strong></p>
+<p>烧写的第一步是关闭写保护，因为出厂加载的固件是读保护的，在锁定时你无法做任何事情。
+要解锁芯片，请执行下面的命令(运行<code>stm8flash -h</code>查看帮助)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">stm8flash -c stlinkv2 -p stm8s103f3 -u</span><br><span class="line">Determine OPT area</span><br><span class="line">Unlocked device. Option bytes reset to default state.</span><br><span class="line">Bytes written: 11</span><br></pre></td></tr></table></figure>
+<p>板子此时应该会停止闪烁，不好，你现在把它变成砖了，
+不过不用担心，我们马上为它烧写新的程序。</p>
+<p>接下来执行<code>make flash</code>命令开始烧写你的程序</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ stm8flash -c stlinkv2 -p stm8s103f3 -s flash -w stm8_blinky.hex</span><br><span class="line">Determine FLASH area</span><br><span class="line">Writing Intel hex file 655 bytes at 0x8000... OK</span><br><span class="line">Bytes written: 655</span><br></pre></td></tr></table></figure>
+<p>此时开发板会立即开始闪烁，你可以通过更改演示观察执行效果，OK，It’s your time now!</p>
+<h3 id="最后的想法"><a href="#最后的想法" class="headerlink" title="最后的想法"></a>最后的想法</h3><p>真心希望这两篇关于STM8的介绍可以帮助到你！
+你现在已经学会的搭建环境和烧写程序，现在尽情发挥你的创意吧！</p>
+<p>我打算花一些时间玩STM8单片机，后续可能还会发表一些自己的想法， Until then, happy hacking!</p>
+<h3 id="声明"><a href="#声明" class="headerlink" title="声明"></a>声明</h3><p>这篇文章是译文，原文地址<a target="_blank" rel="noopener" href="https://www.ondrovo.com/a/20170107-stm8-getting-started/">点击这里</a>，原作者是<code>Ondřej Hruška</code>。
+此译文已获取原作者邮件授权，请仅用于学习用途，不允许转载，谢谢合作！</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/stm8/" rel="tag"># stm8</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/05/23/16-STM8%E5%8D%95%E7%89%87%E6%9C%BA%E4%BB%8B%E7%BB%8D/" rel="prev" title="16. STM8单片机介绍">
+      <i class="fa fa-chevron-left"></i> 16. STM8单片机介绍
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/06/04/18-FreeBSD%E9%85%8D%E7%BD%AE%E7%BD%91%E7%BB%9C%E7%9A%84%E6%96%B9%E6%B3%95/" rel="next" title="18. FreeBSD配置网络的方法">
+      18. FreeBSD配置网络的方法 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="nav-number">1.</span> <span class="nav-text">环境配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B%E7%A8%8B%E5%BA%8F%E5%92%8C%E6%96%87%E6%A1%A3"><span class="nav-number">1.1.</span> <span class="nav-text">实例程序和文档</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E7%A8%8B%E8%BD%AF%E4%BB%B6"><span class="nav-number">1.2.</span> <span class="nav-text">编程软件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BA%93%E6%96%87%E4%BB%B6"><span class="nav-number">1.3.</span> <span class="nav-text">库文件</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BDSPL"><span class="nav-number">1.3.1.</span> <span class="nav-text">下载SPL</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%89%93%E8%A1%A5%E4%B8%81"><span class="nav-number">1.3.2.</span> <span class="nav-text">打补丁</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%80%E5%A7%8B%E4%BD%A0%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E9%A1%B9%E7%9B%AE"><span class="nav-number">2.</span> <span class="nav-text">开始你的第一个项目</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%84%E7%BB%87%E5%8C%96%E4%BD%A0%E7%9A%84%E4%BB%A3%E7%A0%81"><span class="nav-number">2.1.</span> <span class="nav-text">组织化你的代码</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%83%A7%E5%86%99%E7%A8%8B%E5%BA%8F"><span class="nav-number">3.</span> <span class="nav-text">烧写程序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E5%90%8E%E7%9A%84%E6%83%B3%E6%B3%95"><span class="nav-number">4.</span> <span class="nav-text">最后的想法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A3%B0%E6%98%8E"><span class="nav-number">5.</span> <span class="nav-text">声明</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="鸿则"
+      src="https://www.gravatar.com/avatar/90e7b4b3cf7d73f04e6af073141f2d7c.jpg?s=256">
+  <p class="site-author-name" itemprop="name">鸿则</p>
+  <div class="site-description" itemprop="description">啦啦啦啦啦</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hungtcs" title="hungtcs → https://github.com/hungtcs" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>hungtcs</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/hungtcs" title="hungtcs-lab → https://github.com/hungtcs" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>hungtcs-lab</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.youtube.com/channel/UCmGaZOmnP5qx8bbdsPrBPtg" title="YouTube → https://www.youtube.com/channel/UCmGaZOmnP5qx8bbdsPrBPtg" rel="noopener" target="_blank"><i class="fa fa-fw fa-youtube"></i>YouTube</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:hungtcs@163.com" title="E-Mail → mailto:hungtcs@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">鸿则</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v6.0.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

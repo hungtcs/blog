@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="鸿则的博客" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://blog.hungtcs.top').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"b2t":false,"scrollpercent":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="介绍8051微控制器具有timer0和timer1两个定时计数器。使用定时计数器可以独立于单片机内部程序产生一个延时或用于计数。两个定时计数器都是16位宽的，因为8051单片机是8位架构，所以每个16位定时器分别由两个单独的8位寄存器构成。 STC89C52的文档上面说有3个16位定时器，不过这里以传统mcs-51为准">
+<meta property="og:type" content="article">
+<meta property="og:title" content="15. 51单片机的定时计数器">
+<meta property="og:url" content="https://blog.hungtcs.top/2018/05/22/15-51%E5%8D%95%E7%89%87%E6%9C%BA%E7%9A%84%E5%AE%9A%E6%97%B6%E8%AE%A1%E6%95%B0%E5%99%A8/index.html">
+<meta property="og:site_name" content="鸿则的博客">
+<meta property="og:description" content="介绍8051微控制器具有timer0和timer1两个定时计数器。使用定时计数器可以独立于单片机内部程序产生一个延时或用于计数。两个定时计数器都是16位宽的，因为8051单片机是8位架构，所以每个16位定时器分别由两个单独的8位寄存器构成。 STC89C52的文档上面说有3个16位定时器，不过这里以传统mcs-51为准">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-05-22T13:06:11.000Z">
+<meta property="article:modified_time" content="2022-08-17T02:40:45.586Z">
+<meta property="article:author" content="鸿则">
+<meta property="article:tag" content="定时器">
+<meta property="article:tag" content="timer">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://blog.hungtcs.top/2018/05/22/15-51%E5%8D%95%E7%89%87%E6%9C%BA%E7%9A%84%E5%AE%9A%E6%97%B6%E8%AE%A1%E6%95%B0%E5%99%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>15. 51单片机的定时计数器 | 鸿则的博客</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?a8b32306ce37093997d8923fa6bcda22";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">鸿则的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://blog.hungtcs.top/2018/05/22/15-51%E5%8D%95%E7%89%87%E6%9C%BA%E7%9A%84%E5%AE%9A%E6%97%B6%E8%AE%A1%E6%95%B0%E5%99%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://www.gravatar.com/avatar/90e7b4b3cf7d73f04e6af073141f2d7c.jpg?s=256">
+      <meta itemprop="name" content="鸿则">
+      <meta itemprop="description" content="啦啦啦啦啦">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="鸿则的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          15. 51单片机的定时计数器
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-05-22 21:06:11" itemprop="dateCreated datePublished" datetime="2018-05-22T21:06:11+08:00">2018-05-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-08-17 10:40:45" itemprop="dateModified" datetime="2022-08-17T10:40:45+08:00">2022-08-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%95%E7%89%87%E6%9C%BA/" itemprop="url" rel="index">
+                    <span itemprop="name">单片机</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%95%E7%89%87%E6%9C%BA/51%E5%8D%95%E7%89%87%E6%9C%BA/" itemprop="url" rel="index">
+                    <span itemprop="name">51单片机</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>8051微控制器具有<code>timer0</code>和<code>timer1</code>两个定时计数器。使用定时计数器可以独立于单片机内部程序产生一个延时或用于计数。两个定时计数器都是16位宽的，因为8051单片机是8位架构，所以每个16位定时器分别由两个单独的8位寄存器构成。</p>
+<p><em>STC89C52的文档上面说有3个16位定时器，不过这里以传统mcs-51为准</em></p>
+<span id="more"></span>
+<h3 id="主要寄存器的作用"><a href="#主要寄存器的作用" class="headerlink" title="主要寄存器的作用"></a>主要寄存器的作用</h3><table>
+<thead>
+<tr>
+<th style="text-align:left">寄存器</th>
+<th style="text-align:left">地址</th>
+<th style="text-align:left">作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><a href="#TL0-TH0-TL1-TH1">TL0</a></td>
+<td style="text-align:left">0x8A</td>
+<td style="text-align:left">定时器0低8位寄存器</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="#TL0-TH0-TL1-TH1">TL1</a></td>
+<td style="text-align:left">0x8B</td>
+<td style="text-align:left">定时器1低8位寄存器</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="#TL0-TH0-TL1-TH1">TH0</a></td>
+<td style="text-align:left">0x8C</td>
+<td style="text-align:left">定时器0高8位寄存器</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="#TL0-TH0-TL1-TH1">TH1</a></td>
+<td style="text-align:left">0x8D</td>
+<td style="text-align:left">定时器1高8位寄存器</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="#TCON-寄存器">TCON</a></td>
+<td style="text-align:left">0x88</td>
+<td style="text-align:left">定时器控制寄存器</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="#TMOD-寄存器">TMOD</a></td>
+<td style="text-align:left">0x89</td>
+<td style="text-align:left">定时器工作方式寄存器</td>
+</tr>
+</tbody>
+</table>
+<h3 id="TL0-TH0-TL1-TH1"><a href="#TL0-TH0-TL1-TH1" class="headerlink" title="TL0 TH0 TL1 TH1"></a>TL0 TH0 TL1 TH1</h3><p>TH0 和 TL0 组合成timer0 16位定时器;
+TH1 和 TL1 组合成timer1 16位定时器</p>
+<p><style>
+  .table-text-center {
+    th, td {
+      text-align: center;
+    }
+  }
+</style></p>
+<table class="table-text-center">
+  <tr>
+    <td>7</td><td>6</td><td>5</td><td>4</td><td>3</td><td>2</td><td>1</td><td>0</td>
+    <td>7</td><td>6</td><td>5</td><td>4</td><td>3</td><td>2</td><td>1</td><td>0</td>
+  </tr>
+  <tr>
+    <td colspan="8">TH0</td>
+    <td colspan="8">TL0</td>
+  </tr>
+</table>
+
+<h3 id="TCON-寄存器"><a href="#TCON-寄存器" class="headerlink" title="TCON 寄存器"></a>TCON 寄存器</h3><table>
+<thead>
+<tr>
+<th>7</th>
+<th>6</th>
+<th>5</th>
+<th>4</th>
+<th>3</th>
+<th>2</th>
+<th>1</th>
+<th>0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TF1</td>
+<td>TR1</td>
+<td>TF0</td>
+<td>TR0</td>
+<td>IE1</td>
+<td>IT1</td>
+<td>IE0</td>
+<td>IT0</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*  TCON  */</span></span><br><span class="line">__sbit __at (<span class="number">0x88</span>) IT0  ;</span><br><span class="line">__sbit __at (<span class="number">0x89</span>) IE0  ;</span><br><span class="line">__sbit __at (<span class="number">0x8A</span>) IT1  ;</span><br><span class="line">__sbit __at (<span class="number">0x8B</span>) IE1  ;</span><br><span class="line">__sbit __at (<span class="number">0x8C</span>) TR0  ;</span><br><span class="line">__sbit __at (<span class="number">0x8D</span>) TF0  ;</span><br><span class="line">__sbit __at (<span class="number">0x8E</span>) TR1  ;</span><br><span class="line">__sbit __at (<span class="number">0x8F</span>) TF1  ;</span><br></pre></td></tr></table></figure>
+<h3 id="TMOD-寄存器"><a href="#TMOD-寄存器" class="headerlink" title="TMOD 寄存器"></a>TMOD 寄存器</h3><table>
+<thead>
+<tr>
+<th>7</th>
+<th>6</th>
+<th>5</th>
+<th>4</th>
+<th>3</th>
+<th>2</th>
+<th>1</th>
+<th>0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T1_GATE</td>
+<td>T1_CT</td>
+<td>T1_M1</td>
+<td>T1_M0</td>
+<td>T0_GATE</td>
+<td>T0_CT</td>
+<td>T0_M1</td>
+<td>T0_M0</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* BIT definitions for bits that are not directly accessible */</span></span><br><span class="line"><span class="comment">/* TMOD bits */</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> T0_M0           0x01</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> T0_M1           0x02</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> T0_CT           0x04</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> T0_GATE         0x08</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> T1_M0           0x10</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> T1_M1           0x20</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> T1_CT           0x40</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> T1_GATE         0x80</span></span><br></pre></td></tr></table></figure>
+<p>定时器的工作模式</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">M1</th>
+<th style="text-align:left">M0</th>
+<th style="text-align:left">模式</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">13位定时器/计数器, TL只使用低5位</td>
+</tr>
+<tr>
+<td style="text-align:left">0</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">16位定时器/计数器</td>
+</tr>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">2</td>
+<td style="text-align:left">8位定时器/计数器,可以自动装初值</td>
+</tr>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">3</td>
+<td style="text-align:left">T0分成单独两个8位计时器,此时T1不工作</td>
+</tr>
+</tbody>
+</table>
+<h3 id="最大值和初值计算方法"><a href="#最大值和初值计算方法" class="headerlink" title="最大值和初值计算方法"></a>最大值和初值计算方法</h3><p>此处以<code>11.0592MHz</code>晶震、定时器工作方式1为例</p>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>计算方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>最大值</td>
+<td>65536 * 12 / 11.0592 = 71111us</td>
+</tr>
+<tr>
+<td>50ms初值</td>
+<td>65536 - 50000 / (12 / 11.0592) = 19456 = 4C00H</td>
+</tr>
+</tbody>
+</table>
+<h3 id="示例程序"><a href="#示例程序" class="headerlink" title="示例程序"></a>示例程序</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;mcs51/8051.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">unsigned</span> <span class="type">char</span> count = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">setup</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">// set timer 0 mode 1</span></span><br><span class="line">  TMOD = <span class="number">0x01</span>;</span><br><span class="line">  TH0 = <span class="number">0x4C</span>;</span><br><span class="line">  TL0 = <span class="number">0x00</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// start timer 0</span></span><br><span class="line">  TR0 = <span class="number">1</span>;</span><br><span class="line">  <span class="comment">// enable timer 0 interrupt</span></span><br><span class="line">  ET0 = <span class="number">1</span>;</span><br><span class="line">  <span class="comment">// enable all interrupt</span></span><br><span class="line">  EA = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">loop</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">if</span>(count == <span class="number">20</span>)</span><br><span class="line">    P0_0 = !P0_0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  setup();</span><br><span class="line">  <span class="keyword">while</span>(<span class="number">1</span>) loop();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">timer0</span><span class="params">()</span> __interrupt 1</span><br><span class="line">&#123;</span><br><span class="line">  TH0 = <span class="number">0x4C</span>;</span><br><span class="line">  TL0 = <span class="number">0x00</span>;</span><br><span class="line">  count++;</span><br><span class="line">  <span class="keyword">if</span>(count　&gt; <span class="number">20</span>) count = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%AE%9A%E6%97%B6%E5%99%A8/" rel="tag"># 定时器</a>
+              <a href="/tags/timer/" rel="tag"># timer</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/05/19/14-%E5%9C%A8linux%E4%B8%8B%E7%BB%9951%E5%8D%95%E7%89%87%E6%9C%BA%E5%86%99%E7%A8%8B%E5%BA%8F/" rel="prev" title="14. 在linux下给51单片机写程序">
+      <i class="fa fa-chevron-left"></i> 14. 在linux下给51单片机写程序
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/05/23/16-STM8%E5%8D%95%E7%89%87%E6%9C%BA%E4%BB%8B%E7%BB%8D/" rel="next" title="16. STM8单片机介绍">
+      16. STM8单片机介绍 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E8%A6%81%E5%AF%84%E5%AD%98%E5%99%A8%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">2.</span> <span class="nav-text">主要寄存器的作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TL0-TH0-TL1-TH1"><span class="nav-number">3.</span> <span class="nav-text">TL0 TH0 TL1 TH1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCON-%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">4.</span> <span class="nav-text">TCON 寄存器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TMOD-%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">5.</span> <span class="nav-text">TMOD 寄存器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E5%A4%A7%E5%80%BC%E5%92%8C%E5%88%9D%E5%80%BC%E8%AE%A1%E7%AE%97%E6%96%B9%E6%B3%95"><span class="nav-number">6.</span> <span class="nav-text">最大值和初值计算方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B%E7%A8%8B%E5%BA%8F"><span class="nav-number">7.</span> <span class="nav-text">示例程序</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="鸿则"
+      src="https://www.gravatar.com/avatar/90e7b4b3cf7d73f04e6af073141f2d7c.jpg?s=256">
+  <p class="site-author-name" itemprop="name">鸿则</p>
+  <div class="site-description" itemprop="description">啦啦啦啦啦</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hungtcs" title="hungtcs → https://github.com/hungtcs" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>hungtcs</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/hungtcs" title="hungtcs-lab → https://github.com/hungtcs" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>hungtcs-lab</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.youtube.com/channel/UCmGaZOmnP5qx8bbdsPrBPtg" title="YouTube → https://www.youtube.com/channel/UCmGaZOmnP5qx8bbdsPrBPtg" rel="noopener" target="_blank"><i class="fa fa-fw fa-youtube"></i>YouTube</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:hungtcs@163.com" title="E-Mail → mailto:hungtcs@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">鸿则</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v6.0.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

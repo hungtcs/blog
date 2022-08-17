@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="alternate" href="/atom.xml" title="鸿则的博客" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://blog.hungtcs.top').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"b2t":false,"scrollpercent":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="Enhanced ShockBurstTM 发送流程 把地址和要发送的数据按时序送入nRF24l01 配置config寄存器，使之进入发送模式 把CE置高（至少10us），激发Enhanced ShockBurstTM发射">
+<meta property="og:type" content="article">
+<meta property="og:title" content="1. nRF24l01使用说明">
+<meta property="og:url" content="https://blog.hungtcs.top/2018/03/27/1.%20nRF24l01%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E/index.html">
+<meta property="og:site_name" content="鸿则的博客">
+<meta property="og:description" content="Enhanced ShockBurstTM 发送流程 把地址和要发送的数据按时序送入nRF24l01 配置config寄存器，使之进入发送模式 把CE置高（至少10us），激发Enhanced ShockBurstTM发射">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-03-27T09:00:22.000Z">
+<meta property="article:modified_time" content="2022-08-17T02:40:45.580Z">
+<meta property="article:author" content="鸿则">
+<meta property="article:tag" content="nRF24l01">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://blog.hungtcs.top/2018/03/27/1.%20nRF24l01%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>1. nRF24l01使用说明 | 鸿则的博客</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?a8b32306ce37093997d8923fa6bcda22";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">鸿则的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://blog.hungtcs.top/2018/03/27/1.%20nRF24l01%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://www.gravatar.com/avatar/90e7b4b3cf7d73f04e6af073141f2d7c.jpg?s=256">
+      <meta itemprop="name" content="鸿则">
+      <meta itemprop="description" content="啦啦啦啦啦">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="鸿则的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          1. nRF24l01使用说明
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-03-27 17:00:22" itemprop="dateCreated datePublished" datetime="2018-03-27T17:00:22+08:00">2018-03-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-08-17 10:40:45" itemprop="dateModified" datetime="2022-08-17T10:40:45+08:00">2022-08-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%95%E7%89%87%E6%9C%BA/" itemprop="url" rel="index">
+                    <span itemprop="name">单片机</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="Enhanced-ShockBurstTM-发送流程"><a href="#Enhanced-ShockBurstTM-发送流程" class="headerlink" title="Enhanced ShockBurstTM 发送流程"></a>Enhanced ShockBurstTM 发送流程</h3><ol>
+<li>把地址和要发送的数据按时序送入nRF24l01</li>
+<li>配置config寄存器，使之进入发送模式</li>
+<li>把CE置高（至少10us），激发Enhanced ShockBurstTM发射</li>
+</ol>
+<span id="more"></span>
+<h3 id="Enhanced-ShockBurstTM-发送模式初始化流程"><a href="#Enhanced-ShockBurstTM-发送模式初始化流程" class="headerlink" title="Enhanced ShockBurstTM 发送模式初始化流程"></a>Enhanced ShockBurstTM 发送模式初始化流程</h3><ol>
+<li>写Tx节点地址  TX_ADDR</li>
+<li>写Rx节点的地址（使能<code>auto ack</code>）  RX_ADDR_P0</li>
+<li>使能<code>auto ack</code>  EN_AA</li>
+<li>使能PIPE0 EN_RXADDR</li>
+<li>配置自动重发次数  SETUP_RETR</li>
+<li>选择通信频率  RF_CH  (2400 + RF_CH MHz) (0~125)</li>
+<li>配置发射参数（低噪方法增益、发射功率、无线速率）  RF_SETUP</li>
+<li>配置24l01的基本参数以及切换工作模式  CONFIG</li>
+</ol>
+<h3 id="Enhanced-ShockBurstTM-接收流程"><a href="#Enhanced-ShockBurstTM-接收流程" class="headerlink" title="Enhanced ShockBurstTM 接收流程"></a>Enhanced ShockBurstTM 接收流程</h3><ol>
+<li>配置接收地址和要接收的数据包大小</li>
+<li>配置CONFIG寄存器，使之进入接收模式，置高CE</li>
+<li>130us后，nrf24l01进入监视状态，等待接收数据包</li>
+<li>当接收到正确的数据包，nrf24l01自动去除字头、地址和CRC校验码</li>
+<li>nrf24l01通过把STATUS寄存器的RX_DR置位（引起微控制器中断）通知微控制器</li>
+<li>微控制器把数据从FIFO读出（0x61指令）</li>
+<li>数据读取完毕后，可以清楚STATUS寄存器。nrf24l01进入四种主要模式之一</li>
+</ol>
+<h3 id="Enhanced-ShockBurstTM-接收模式初始化"><a href="#Enhanced-ShockBurstTM-接收模式初始化" class="headerlink" title="Enhanced ShockBurstTM 接收模式初始化"></a>Enhanced ShockBurstTM 接收模式初始化</h3><ol>
+<li>写Rx节点的地址  RX_ADDR_P0</li>
+<li>使能<code>auto ack</code>  EN_AA</li>
+<li>使能PIPE0  EN_RX_ADDR</li>
+<li>选择通信频率  RF_CH</li>
+<li>选择通道0有效数据宽度  RX_PW_P0</li>
+<li>配置发射参数（低噪放大增益、发射功率、无线速率）  RF_SETUP</li>
+<li>配置24l01的基本参数以切换工作模式  CONFIG</li>
+</ol>
+<h3 id="SPI指令"><a href="#SPI指令" class="headerlink" title="SPI指令"></a>SPI指令</h3><table>
+<thead>
+<tr>
+<th>指令名称</th>
+<th>指令格式</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R_REGISTER</td>
+<td>000A AAAA</td>
+<td>读寄存器。A AAAA为要读取的寄存器地址</td>
+</tr>
+<tr>
+<td>W_REGISTER</td>
+<td>001A AAAA</td>
+<td>写寄存器。</td>
+</tr>
+<tr>
+<td>R_RX_PAYLOAD</td>
+<td>0110 0001</td>
+<td>读RX有效数据，1～32字节。读取操作从字节0开始，当读RX有效数据完成后，FIFO寄存器中的使有效数据将被清除。接收模式下使用</td>
+</tr>
+<tr>
+<td>W_TX_PAYLOAD</td>
+<td>1010 0000</td>
+<td>写有效数据，1～32字节。写操作从字节0开始。发送模式下用。</td>
+</tr>
+<tr>
+<td>FLUSH_TX</td>
+<td>1110 0001</td>
+<td>清除TX FIFO寄存器。发送模式下用。</td>
+</tr>
+<tr>
+<td>FLUSH_RX</td>
+<td>1110 0010</td>
+<td>清除RX FIFO寄存器。接收模式下用。</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> NRF_READ_REG    0x00</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NRF_WRITE_REG   0x20</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> RD_RX_PLOAD     0x61</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> WR_TX_PLOAD     0xA0</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> FLUSH_TX        0xE1</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> FLUSH_RX        0xE2</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NOP             0xFF</span></span><br></pre></td></tr></table></figure>
+<h3 id="CONFIG寄存器"><a href="#CONFIG寄存器" class="headerlink" title="CONFIG寄存器"></a>CONFIG寄存器</h3><table>
+<thead>
+<tr>
+<th>地址</th>
+<th>参数</th>
+<th>位</th>
+<th>复位值</th>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x00</td>
+<td>CONFIG</td>
+<td></td>
+<td></td>
+<td></td>
+<td>配置寄存器</td>
+</tr>
+<tr>
+<td></td>
+<td>Reserved</td>
+<td>7</td>
+<td>0</td>
+<td>R/W</td>
+<td>保留位</td>
+</tr>
+<tr>
+<td></td>
+<td>MASK_RX_DR</td>
+<td>6</td>
+<td>0</td>
+<td>R/W</td>
+<td>可屏蔽中断 RX_RD<br /> 1: IRQ引脚不输出RX_RD中断<br />0: RX_RD中断时，IRQ输出低电平</td>
+</tr>
+<tr>
+<td></td>
+<td>MASK_TX_DS</td>
+<td>5</td>
+<td>0</td>
+<td>R/W</td>
+<td>可屏蔽中断 TX_DS<br /> 1: IRQ引脚不输出TX_DS中断<br />0: RX_DS中断时，IRQ输出低电平</td>
+</tr>
+<tr>
+<td></td>
+<td>MASK_MAX_RT</td>
+<td>4</td>
+<td>0</td>
+<td>R/W</td>
+<td>可屏蔽中断 MAX_RT<br />1: IRQ引脚不输出MAX_RT中断<br />0: MAX_RT中断时，IRQ输出低电平</td>
+</tr>
+<tr>
+<td></td>
+<td>EN_CRC</td>
+<td>3</td>
+<td>1</td>
+<td>R/W</td>
+<td>CRC使能。如果EN_AA中任意一位置高，则EN_CRC强迫为高</td>
+</tr>
+<tr>
+<td></td>
+<td>CRCO</td>
+<td>2</td>
+<td>0</td>
+<td>R/W</td>
+<td>CRC模式。<br />0: 8位CRC<br />1: 16位CRC</td>
+</tr>
+<tr>
+<td></td>
+<td>PWR_UP</td>
+<td>1</td>
+<td>0</td>
+<td>R/W</td>
+<td>1: 上电<br />0: 掉电</td>
+</tr>
+<tr>
+<td></td>
+<td>PRIM_RX</td>
+<td>0</td>
+<td>0</td>
+<td>R/W</td>
+<td>1: 接收模式<br />0: 发送模式</td>
+</tr>
+</tbody>
+</table>
+<h3 id="自动应答使能寄存器-EN-AA"><a href="#自动应答使能寄存器-EN-AA" class="headerlink" title="自动应答使能寄存器 EN_AA"></a>自动应答使能寄存器 EN_AA</h3><table>
+<thead>
+<tr>
+<th>地址</th>
+<th>参数</th>
+<th>位</th>
+<th>复位值</th>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x01</td>
+<td>EN_AA</td>
+<td></td>
+<td></td>
+<td></td>
+<td>自动应答使能寄存器<br /> <strong>同时可以使能Enhanced模式</strong></td>
+</tr>
+<tr>
+<td></td>
+<td>Reserved</td>
+<td>7~6</td>
+<td>0</td>
+<td>R/W</td>
+<td>保留位</td>
+</tr>
+<tr>
+<td></td>
+<td>ENAA_P5</td>
+<td>5</td>
+<td>1</td>
+<td>R/W</td>
+<td>数据通道5,自动应答允许</td>
+</tr>
+<tr>
+<td></td>
+<td>ENAA_P4</td>
+<td>4</td>
+<td>1</td>
+<td>R/W</td>
+<td>数据通道4,自动应答允许</td>
+</tr>
+<tr>
+<td></td>
+<td>ENAA_P3</td>
+<td>3</td>
+<td>1</td>
+<td>R/W</td>
+<td>数据通道3,自动应答允许</td>
+</tr>
+<tr>
+<td></td>
+<td>ENAA_P2</td>
+<td>2</td>
+<td>1</td>
+<td>R/W</td>
+<td>数据通道2,自动应答允许</td>
+</tr>
+<tr>
+<td></td>
+<td>ENAA_P1</td>
+<td>1</td>
+<td>1</td>
+<td>R/W</td>
+<td>数据通道1,自动应答允许</td>
+</tr>
+<tr>
+<td></td>
+<td>ENAA_P0</td>
+<td>0</td>
+<td>1</td>
+<td>R/W</td>
+<td>数据通道0,自动应答允许</td>
+</tr>
+</tbody>
+</table>
+<h3 id="RX地址使能寄存器"><a href="#RX地址使能寄存器" class="headerlink" title="RX地址使能寄存器"></a>RX地址使能寄存器</h3><table>
+<thead>
+<tr>
+<th>地址</th>
+<th>参数</th>
+<th>位</th>
+<th>复位值</th>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x02</td>
+<td>EN_RX_ADDR</td>
+<td></td>
+<td></td>
+<td></td>
+<td>RX地址使能寄存器</td>
+</tr>
+<tr>
+<td></td>
+<td>Reserved</td>
+<td>7~6</td>
+<td>0</td>
+<td>R/W</td>
+<td>保留位</td>
+</tr>
+<tr>
+<td></td>
+<td>ERX_P5</td>
+<td>5</td>
+<td>1</td>
+<td>R/W</td>
+<td>数据接收通道5使能</td>
+</tr>
+<tr>
+<td></td>
+<td>ERX_P4</td>
+<td>4</td>
+<td>1</td>
+<td>R/W</td>
+<td>数据接收通道4使能</td>
+</tr>
+<tr>
+<td></td>
+<td>ERX_P3</td>
+<td>3</td>
+<td>1</td>
+<td>R/W</td>
+<td>数据接收通道3使能</td>
+</tr>
+<tr>
+<td></td>
+<td>ERX_P2</td>
+<td>2</td>
+<td>1</td>
+<td>R/W</td>
+<td>数据接收通道2使能</td>
+</tr>
+<tr>
+<td></td>
+<td>ERX_P1</td>
+<td>1</td>
+<td>1</td>
+<td>R/W</td>
+<td>数据接收通道1使能</td>
+</tr>
+<tr>
+<td></td>
+<td>ERX_P0</td>
+<td>0</td>
+<td>1</td>
+<td>R/W</td>
+<td>数据接收通道0使能</td>
+</tr>
+</tbody>
+</table>
+<h3 id="自动重发设置寄存器"><a href="#自动重发设置寄存器" class="headerlink" title="自动重发设置寄存器"></a>自动重发设置寄存器</h3><table>
+<thead>
+<tr>
+<th>地址</th>
+<th>参数</th>
+<th>位</th>
+<th>复位值</th>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x04</td>
+<td>SETUP_RETR</td>
+<td></td>
+<td></td>
+<td></td>
+<td>自动重发设置寄存器</td>
+</tr>
+<tr>
+<td></td>
+<td>ARD</td>
+<td>7~4</td>
+<td>0000</td>
+<td>R/W</td>
+<td>自动重发延时<br />0000~1111 -&gt; 85us+250*(ARD+1)us</td>
+</tr>
+<tr>
+<td></td>
+<td>ARC</td>
+<td>3~0</td>
+<td>0000</td>
+<td>R/W</td>
+<td>自动重发次数<br />0000~1111 -&gt; 0代表禁止</td>
+</tr>
+</tbody>
+</table>
+<h3 id="射频频率设置寄存器"><a href="#射频频率设置寄存器" class="headerlink" title="射频频率设置寄存器"></a>射频频率设置寄存器</h3><table>
+<thead>
+<tr>
+<th>地址</th>
+<th>参数</th>
+<th>位</th>
+<th>复位值</th>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x05</td>
+<td>RF_CH</td>
+<td></td>
+<td></td>
+<td></td>
+<td>射频频率设置寄存器</td>
+</tr>
+<tr>
+<td></td>
+<td>Reserved</td>
+<td>7</td>
+<td>0</td>
+<td>R/W</td>
+<td>保留位</td>
+</tr>
+<tr>
+<td></td>
+<td>RF_CH</td>
+<td>6~0</td>
+<td>000 0010</td>
+<td>R/W</td>
+<td>0~125,设置nrf24l01的射频频率</td>
+</tr>
+</tbody>
+</table>
+<h3 id="射频配置寄存器"><a href="#射频配置寄存器" class="headerlink" title="射频配置寄存器"></a>射频配置寄存器</h3><table>
+<thead>
+<tr>
+<th>地址</th>
+<th>参数</th>
+<th>位</th>
+<th>复位值</th>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x06</td>
+<td>RF_SETUP</td>
+<td></td>
+<td></td>
+<td></td>
+<td>射频配置寄存器</td>
+</tr>
+<tr>
+<td></td>
+<td>COUNT_WAVE</td>
+<td>7</td>
+<td>0</td>
+<td>R/W</td>
+<td>使能连续载波发送</td>
+</tr>
+<tr>
+<td></td>
+<td>Reserved</td>
+<td>6</td>
+<td>0</td>
+<td>R/W</td>
+<td>保留位</td>
+</tr>
+<tr>
+<td></td>
+<td>RF_DR_LOW</td>
+<td>5</td>
+<td>0</td>
+<td>R/W</td>
+<td>射频数据速率设置低位<br />1: 250Kbps</td>
+</tr>
+<tr>
+<td></td>
+<td>PLL_LOCK</td>
+<td>4</td>
+<td>0</td>
+<td>R/W</td>
+<td>PLL_LOCK允许，仅用于测试模式</td>
+</tr>
+<tr>
+<td></td>
+<td>RF_DR_HIGH</td>
+<td>3</td>
+<td>0</td>
+<td>R/W</td>
+<td>射频数据速率设置高位，和低位配置设置速率[ RF_DR_HIGH RF_DR_LOW ]<br />00: 1Mbps <br />10: 2Mbps <br />01: 250Kbps <br />11: 保留</td>
+</tr>
+<tr>
+<td></td>
+<td>RF_PWR</td>
+<td>2~1</td>
+<td>11</td>
+<td>R/W</td>
+<td>设置射频输出功率<br />00: -18dBm <br />01: -12dBm <br />10: -6dBm <br />11: 0bBm</td>
+</tr>
+<tr>
+<td></td>
+<td>Obsolete</td>
+<td>0</td>
+<td>1</td>
+<td>R/W</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<h3 id="状态寄存器"><a href="#状态寄存器" class="headerlink" title="状态寄存器"></a>状态寄存器</h3><table>
+<thead>
+<tr>
+<th>地址</th>
+<th>参数</th>
+<th>位</th>
+<th>复位值</th>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x07</td>
+<td>STATUS</td>
+<td></td>
+<td></td>
+<td></td>
+<td>状态寄存器</td>
+</tr>
+<tr>
+<td></td>
+<td>Reserved</td>
+<td>7</td>
+<td>0</td>
+<td>R/W</td>
+<td>保留位</td>
+</tr>
+<tr>
+<td></td>
+<td>RX_DR</td>
+<td>6</td>
+<td>0</td>
+<td>R/W</td>
+<td>数据接收标志，收到数据后置一。写1清0</td>
+</tr>
+<tr>
+<td></td>
+<td>TX_DS</td>
+<td>5</td>
+<td>0</td>
+<td>R/W</td>
+<td>数据发送完成标志，如果工作在自动应答模式，则必须收到ACK才会置1。写1清0</td>
+</tr>
+<tr>
+<td></td>
+<td>MAX_RT</td>
+<td>4</td>
+<td>0</td>
+<td>R/W</td>
+<td>达到最大重发次数。写1清0</td>
+</tr>
+<tr>
+<td></td>
+<td>RX_P_NO</td>
+<td>3~1</td>
+<td>111</td>
+<td>R/W</td>
+<td>接收数据通道<br />000~111: 数据通道号 <br />110: 未使用 <br />111: RX_FIFO寄存器空</td>
+</tr>
+<tr>
+<td></td>
+<td>TX_FULL</td>
+<td>0</td>
+<td>1</td>
+<td>R/W</td>
+<td>TX_FIFO寄存器满标志<br />1: 满 <br />0: 未满</td>
+</tr>
+</tbody>
+</table>
+<h3 id="数据通道接收地址寄存器"><a href="#数据通道接收地址寄存器" class="headerlink" title="数据通道接收地址寄存器"></a>数据通道接收地址寄存器</h3><table>
+<thead>
+<tr>
+<th>地址</th>
+<th>参数</th>
+<th>位</th>
+<th>复位值</th>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x0A</td>
+<td>RX_ADDR_P0</td>
+<td></td>
+<td></td>
+<td></td>
+<td>数据通道0接收地址寄存器</td>
+</tr>
+<tr>
+<td></td>
+<td>RX_ADDR_P0</td>
+<td>39~0</td>
+<td>0xe7e7e7e7e7</td>
+<td>R/W</td>
+<td>数据通道0接收地址寄存器,最大长度5个字节<br />由SETUP_AW(0x03)寄存器控制地址长度(默认是5个字节)</td>
+</tr>
+</tbody>
+</table>
+<p>类似的，还有通道1~5接收地址 设置寄存器： RX_ARRD_P1~5。
+不过P1~P5共用32位高位地址，由P1设置，
+P2~P4只可以设置8位地址（低8位）。</p>
+<h3 id="发送地址设置寄存器"><a href="#发送地址设置寄存器" class="headerlink" title="发送地址设置寄存器"></a>发送地址设置寄存器</h3><table>
+<thead>
+<tr>
+<th>地址</th>
+<th>参数</th>
+<th>位</th>
+<th>复位值</th>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x10</td>
+<td>TX_ADDR</td>
+<td></td>
+<td></td>
+<td></td>
+<td>发送地址设置寄存器</td>
+</tr>
+<tr>
+<td></td>
+<td>TX_ADDR</td>
+<td>39~0</td>
+<td>0xe7e7e7e7e7</td>
+<td>R/W</td>
+<td>发送地址设置（先写低字节）。在Enhanced模式下，RX_ADDR_P0的地址应与此地址相同</td>
+</tr>
+</tbody>
+</table>
+<h3 id="接收通道有效数据宽度设置寄存器"><a href="#接收通道有效数据宽度设置寄存器" class="headerlink" title="接收通道有效数据宽度设置寄存器"></a>接收通道有效数据宽度设置寄存器</h3><table>
+<thead>
+<tr>
+<th>地址</th>
+<th>参数</th>
+<th>位</th>
+<th>复位值</th>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x11</td>
+<td>RX_PW_P0</td>
+<td></td>
+<td></td>
+<td></td>
+<td>接收通道0有效数据宽度设置寄存器</td>
+</tr>
+<tr>
+<td></td>
+<td>Reserved</td>
+<td>7~6</td>
+<td>0</td>
+<td>R/W</td>
+<td>保留位</td>
+</tr>
+<tr>
+<td></td>
+<td>RX_PW_P0</td>
+<td>5~0</td>
+<td>0</td>
+<td>R/W</td>
+<td>数据通道0接收区有效数据宽度<br />0: 非法 <br />1~32: 表示1~32字节</td>
+</tr>
+</tbody>
+</table>
+<p>类似的还有通道1～5有效数据宽度设置寄存器： RX_PW_P1~5，
+对应通道1～5的接收有效数据宽度，方法同RX_PW_P0</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/nRF24l01/" rel="tag"># nRF24l01</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2018/03/28/2.%208051%E9%A9%B1%E5%8A%A8%20LCD1602%20%E4%BE%8B%E5%AD%90/" rel="next" title="2. 8051驱动 LCD1602 例子">
+      2. 8051驱动 LCD1602 例子 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Enhanced-ShockBurstTM-%E5%8F%91%E9%80%81%E6%B5%81%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">Enhanced ShockBurstTM 发送流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Enhanced-ShockBurstTM-%E5%8F%91%E9%80%81%E6%A8%A1%E5%BC%8F%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">Enhanced ShockBurstTM 发送模式初始化流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Enhanced-ShockBurstTM-%E6%8E%A5%E6%94%B6%E6%B5%81%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">Enhanced ShockBurstTM 接收流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Enhanced-ShockBurstTM-%E6%8E%A5%E6%94%B6%E6%A8%A1%E5%BC%8F%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">4.</span> <span class="nav-text">Enhanced ShockBurstTM 接收模式初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SPI%E6%8C%87%E4%BB%A4"><span class="nav-number">5.</span> <span class="nav-text">SPI指令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CONFIG%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">6.</span> <span class="nav-text">CONFIG寄存器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E5%BA%94%E7%AD%94%E4%BD%BF%E8%83%BD%E5%AF%84%E5%AD%98%E5%99%A8-EN-AA"><span class="nav-number">7.</span> <span class="nav-text">自动应答使能寄存器 EN_AA</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RX%E5%9C%B0%E5%9D%80%E4%BD%BF%E8%83%BD%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">8.</span> <span class="nav-text">RX地址使能寄存器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E9%87%8D%E5%8F%91%E8%AE%BE%E7%BD%AE%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">9.</span> <span class="nav-text">自动重发设置寄存器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%84%E9%A2%91%E9%A2%91%E7%8E%87%E8%AE%BE%E7%BD%AE%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">10.</span> <span class="nav-text">射频频率设置寄存器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%84%E9%A2%91%E9%85%8D%E7%BD%AE%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">11.</span> <span class="nav-text">射频配置寄存器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">12.</span> <span class="nav-text">状态寄存器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E9%80%9A%E9%81%93%E6%8E%A5%E6%94%B6%E5%9C%B0%E5%9D%80%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">13.</span> <span class="nav-text">数据通道接收地址寄存器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%91%E9%80%81%E5%9C%B0%E5%9D%80%E8%AE%BE%E7%BD%AE%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">14.</span> <span class="nav-text">发送地址设置寄存器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A5%E6%94%B6%E9%80%9A%E9%81%93%E6%9C%89%E6%95%88%E6%95%B0%E6%8D%AE%E5%AE%BD%E5%BA%A6%E8%AE%BE%E7%BD%AE%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">15.</span> <span class="nav-text">接收通道有效数据宽度设置寄存器</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="鸿则"
+      src="https://www.gravatar.com/avatar/90e7b4b3cf7d73f04e6af073141f2d7c.jpg?s=256">
+  <p class="site-author-name" itemprop="name">鸿则</p>
+  <div class="site-description" itemprop="description">啦啦啦啦啦</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hungtcs" title="hungtcs → https://github.com/hungtcs" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>hungtcs</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/hungtcs" title="hungtcs-lab → https://github.com/hungtcs" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>hungtcs-lab</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.youtube.com/channel/UCmGaZOmnP5qx8bbdsPrBPtg" title="YouTube → https://www.youtube.com/channel/UCmGaZOmnP5qx8bbdsPrBPtg" rel="noopener" target="_blank"><i class="fa fa-fw fa-youtube"></i>YouTube</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:hungtcs@163.com" title="E-Mail → mailto:hungtcs@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">鸿则</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v6.0.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
