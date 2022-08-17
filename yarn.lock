@@ -1023,10 +1023,8 @@ find-up@^1.0.0:
     pinkie-promise "^2.0.0"
 
 follow-redirects@^1.2.5:
-  version "1.4.1"
-  resolved "http://registry.npm.taobao.org/follow-redirects/download/follow-redirects-1.4.1.tgz#d8120f4518190f55aac65bb6fc7b85fcd666d6aa"
-  dependencies:
-    debug "^3.1.0"
+  version "1.15.1"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.1.tgz#0ca6a452306c9b276e4d3127483e29575e207ad5"
 
 for-in@^1.0.1:
   version "1.0.2"
